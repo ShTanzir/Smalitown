@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>SN Mods | Smali Lesson 19</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0f0f2a;
+            color: #e0e6f0;
+            padding: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            overflow-y: auto;
+            overflow-x: hidden;
+            background-image:
+                radial-gradient(ellipse at 10% 20%, rgba(0, 255, 200, 0.06) 0%, transparent 50%),
+                radial-gradient(ellipse at 90% 80%, rgba(0, 200, 255, 0.06) 0%, transparent 50%);
+        }
+        .container {
+            max-width: 860px;
+            width: 100%;
+            background: rgba(20, 20, 50, 0.92);
+            backdrop-filter: blur(16px);
+            border-radius: 40px;
+            padding: 28px 26px;
+            border: 1px solid rgba(0, 255, 200, 0.06);
+            box-shadow: 0 30px 80px rgba(0,0,0,0.9);
+            margin: 10px 0;
+            position: relative;
+            overflow: hidden;
+        }
+        .container::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle at 30% 40%, rgba(0,255,200,0.02), transparent 60%),
+                        radial-gradient(circle at 70% 60%, rgba(0,200,255,0.02), transparent 60%);
+            pointer-events: none;
+            animation: rotateBg 30s linear infinite;
+        }
+        @keyframes rotateBg {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 2px solid rgba(0, 255, 200, 0.08);
+            padding-bottom: 18px;
+            margin-bottom: 28px;
+            flex-wrap: wrap;
+            gap: 12px;
+            position: relative;
+            z-index: 1;
+        }
+        .header .brand .logo {
+            font-size: 1.2rem;
+            color: #00ffc8;
+            font-weight: 700;
+            background: rgba(0,255,200,0.06);
+            padding: 4px 14px;
+            border-radius: 50px;
+            border: 1px solid rgba(0,255,200,0.08);
+        }
+        .header h1 {
+            font-size: 1.8rem;
+            background: linear-gradient(135deg, #00ffc8, #00a3ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 900;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .header h1 .icon { font-size: 2rem; animation: pulse 2s infinite; }
+        @keyframes pulse { 0%,100%{transform:scale(1);} 50%{transform:scale(1.1) rotate(5deg);} }
+        .header .badge {
+            background: rgba(0,255,200,0.1);
+            padding: 6px 20px;
+            border-radius: 50px;
+            font-size: 0.8rem;
+            color: #00ffc8;
+            border: 1px solid rgba(0,255,200,0.15);
+            font-weight: 600;
+        }
+        .lesson-card {
+            background: rgba(0,0,0,0.3);
+            border-radius: 24px;
+            padding: 24px 28px;
+            margin-bottom: 24px;
+            border-left: 5px solid #00ffc8;
+            box-shadow: 0 8px 40px rgba(0,0,0,0.3);
+            position: relative;
+            z-index: 1;
+            transition: 0.3s;
+        }
+        .lesson-card:hover { transform: translateX(4px); border-left-color: #00a3ff; }
+        .lesson-card .lesson-number {
+            font-size: 0.75rem;
+            color: #00ffc8;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            font-weight: 700;
+            background: rgba(0,255,200,0.05);
+            display: inline-block;
+            padding: 4px 16px;
+            border-radius: 50px;
+            border: 1px solid rgba(0,255,200,0.06);
+            margin-bottom: 10px;
+        }
+        .lesson-card h2 {
+            font-size: 1.8rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #fff, #00ffc8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin: 6px 0 14px 0;
+        }
+        .lesson-card p { line-height: 2; color: #c8d4e8; font-size: 1.02rem; }
+        .lesson-card p strong { color: #00ffc8; }
+        .highlight-box {
+            background: rgba(0,255,200,0.05);
+            border-radius: 16px;
+            padding: 16px 22px;
+            margin: 18px 0;
+            border: 1px solid rgba(0,255,200,0.06);
+            transition: 0.3s;
+        }
+        .highlight-box:hover { border-color: rgba(0,255,200,0.15); }
+        .highlight-box .emoji { font-size: 1.4rem; margin-right: 8px; }
+        .highlight-box strong { color: #00ffc8; }
+        .highlight-box code {
+            color: #00ffc8;
+            font-family: 'Fira Code', monospace;
+            background: rgba(0,0,0,0.4);
+            padding: 2px 12px;
+            border-radius: 6px;
+            font-size: 0.9rem;
+        }
+        .code-block {
+            background: #070b16;
+            border-radius: 18px;
+            padding: 20px 24px;
+            overflow-x: auto;
+            border: 1px solid rgba(0,255,200,0.04);
+            font-family: 'Fira Code', monospace;
+            font-size: 0.92rem;
+            direction: ltr;
+            text-align: left;
+            white-space: pre-wrap;
+            color: #d4e0ff;
+            margin: 16px 0;
+            box-shadow: inset 0 4px 30px rgba(0,0,0,0.6);
+            transition: 0.3s;
+        }
+        .code-block:hover { border-color: rgba(0,255,200,0.1); }
+        .code-block .comment { color: #4a7a8a; font-style: italic; }
+        .code-block .keyword { color: #ff79c6; font-weight: 700; }
+        .code-block .string { color: #f1fa8c; }
+        .code-block .number { color: #bd93f9; font-weight: 600; }
+        .code-block .class { color: #8be9fd; font-weight: 600; }
+        .code-block .method { color: #50fa7b; font-weight: 600; }
+        .code-block .opcode { color: #50fa7b; font-weight: 700; }
+        .code-block .register { color: #ffb86c; font-weight: 600; }
+        .code-block .label { color: #ffd700; font-weight: 600; }
+        .table-wrap {
+            overflow-x: auto;
+            margin: 18px 0;
+            border-radius: 18px;
+            border: 1px solid rgba(255,255,255,0.03);
+            box-shadow: 0 4px 30px rgba(0,0,0,0.2);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: rgba(0,0,0,0.25);
+            font-size: 0.95rem;
+        }
+        th {
+            background: rgba(0,255,200,0.06);
+            color: #00ffc8;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            font-size: 0.75rem;
+            padding: 14px 18px;
+            border-bottom: 2px solid rgba(0,255,200,0.04);
+        }
+        td {
+            padding: 13px 18px;
+            border-bottom: 1px solid rgba(255,255,255,0.02);
+            color: #c8d4e8;
+        }
+        tr:hover td { background: rgba(0,255,200,0.02); }
+        td code {
+            color: #8be9fd;
+            font-family: 'Fira Code', monospace;
+            background: rgba(0,0,0,0.3);
+            padding: 2px 10px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 28px;
+            color: #4a5a6a;
+            font-size: 0.8rem;
+            border-top: 1px solid rgba(255,255,255,0.02);
+            padding-top: 20px;
+            position: relative;
+            z-index: 1;
+        }
+        .footer .sn {
+            background: linear-gradient(135deg, #00ffc8, #00a3ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 700;
+            font-size: 1rem;
+        }
+        .footer .heart { color: #ff2d75; animation: pulse 1.5s infinite; display: inline-block; }
+        .footer .tag { color: #88aaff; font-weight: 600; }
+        @media (max-width: 600px) {
+            .container { padding: 16px 14px; }
+            .header h1 { font-size: 1.4rem; }
+            .lesson-card h2 { font-size: 1.3rem; }
+            .lesson-card { padding: 18px 16px; }
+            .code-block { font-size: 0.75rem; padding: 14px 16px; }
+            .highlight-box { padding: 14px 16px; }
+            th, td { padding: 10px 12px; font-size: 0.85rem; }
+            .header .brand .logo { font-size: 0.9rem; }
+        }
+        ::-webkit-scrollbar { width: 5px; height: 5px; }
+        ::-webkit-scrollbar-track { background: rgba(255,255,255,0.02); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb { background: linear-gradient(180deg, #00ffc8, #00a3ff); border-radius: 10px; }
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <!-- HEADER -->
+    <div class="header">
+        <div class="brand"><span class="logo">🔥 SN Mods</span></div>
+        <h1><span class="icon">🏘️</span> Smali Town</h1>
+        <span class="badge">📘 Lesson 19 / 20</span>
+    </div>
+
+    <!-- LESSON 19 -->
+    <div class="lesson-card">
+        <div class="lesson-number">📖 Lesson 19</div>
+        <h2>Project 1: Modding a Simple App</h2>
+
+        <p>
+            This is it! <strong>Time to apply everything you've learned!</strong>
+            <br />
+            We'll mod a simple app step by step, from <strong>decompilation</strong> to <strong>testing</strong>.
+        </p>
+
+        <div class="highlight-box">
+            <span class="emoji">🎯</span> <strong>Project Goals:</strong><br />
+            🔹 Mod a <strong>simple calculator/utility app</strong> with premium features
+            <br />
+            🔹 <strong>Unlock</strong> all premium features
+            <br />
+            🔹 <strong>Remove</strong> ads and limitations
+            <br />
+            🔹 <strong>Learn</strong> the complete modding workflow
+        </div>
+
+        <p><strong>Step 1: Choose Your Target</strong></p>
+
+        <div class="highlight-box" style="border-color: rgba(255, 215, 0, 0.12);">
+            <span class="emoji">📱</span> <strong>Recommendation:</strong><br />
+            Start with a <strong>simple app</strong> that has premium features:
+            <br />
+            🔸 A <strong>calculator</strong> with extra functions locked behind premium
+            <br />
+            🔸 A <strong>photo editor</strong> with filters locked
+            <br />
+            🔸 A <strong>game</strong> with levels or characters locked
+            <br /><br />
+            <strong>Avoid</strong> apps with heavy obfuscation or root detection for your first project!
+        </div>
+
+        <p><strong>Step 2: Decompile the App</strong></p>
+
+        <div class="code-block">
+<span class="comment"># Using APKTool</span>
+<span class="label">apktool</span> d <span class="string">target_app.apk</span>
+
+<span class="comment"># The decompiled files will be in a folder named "target_app"</span>
+<span class="comment"># Look for the "smali" folder</span>
+        </div>
+
+        <div class="highlight-box" style="border-color: rgba(0, 200, 255, 0.12);">
+            <span class="emoji">💡</span> <strong>Tip:</strong><br />
+            Use <strong>JADX</strong> to see the Java code alongside the Smali code.
+            <br />
+            This helps you <strong>understand</strong> what the app is doing!
+        </div>
+
+        <p><strong>Step 3: Find the Premium Feature</strong></p>
+
+        <div class="code-block">
+<span class="comment"># Search for keywords in the smali folder</span>
+<span class="label">grep</span> <span class="opcode">-r</span> <span class="string">"is_premium"</span> smali/
+<span class="label">grep</span> <span class="opcode">-r</span> <span class="string">"is_vip"</span> smali/
+<span class="label">grep</span> <span class="opcode">-r</span> <span class="string">"has_pro"</span> smali/
+
+<span class="comment"># You might find something like this:</span>
+<span class="class">Lcom/example/PremiumManager;->isPremium()Z</span>
+        </div>
+
+        <div class="highlight-box" style="border-color: rgba(255, 215, 0, 0.12);">
+            <span class="emoji">🔍</span> <strong>What to look for:</strong><br />
+            🔸 Methods that return <code>Z</code> (boolean)
+            <br />
+            🔸 Methods with names like <code>isPremium</code>, <code>hasPro</code>, <code>checkLicense</code>
+            <br />
+            🔸 Fields with names like <code>premium</code>, <code>vip</code>, <code>unlocked</code>
+            <br />
+            🔸 Conditional checks (<code>if-eqz</code>, <code>if-nez</code>) that check these values
+        </div>
+
+        <p><strong>Step 4: Apply the Patch</strong></p>
+
+        <div class="code-block">
+<span class="comment"># Found: PremiumManager.smali</span>
+<span class="keyword">.method</span> <span class="keyword">public</span> <span class="method">isPremium</span>()<span class="class">Z</span>
+    <span class="opcode">.locals</span> <span class="number">1</span>
+    <span class="opcode">.prologue</span>
+
+    <span class="comment"># Original: returns a value from SharedPreferences</span>
+    <span class="opcode">iget</span> <span class="register">v0</span>, <span class="register">p0</span>, <span class="class">Lcom/example/PremiumManager;</span><span class="opcode">-</span><span class="register">is_premium</span>:<span class="class">Z</span>
+    <span class="opcode">return</span> <span class="register">v0</span>
+<span class="keyword">.end method</span>
+
+<span class="comment"># PATCH: Force return true</span>
+<span class="keyword">.method</span> <span class="keyword">public</span> <span class="method">isPremium</span>()<span class="class">Z</span>
+    <span class="opcode">.locals</span> <span class="number">1</span>
+    <span class="opcode">.prologue</span>
+
+    <span class="opcode">const/4</span> <span class="register">v0</span>, <span class="number">0x1</span>   <span class="comment"># ✅ ALWAYS TRUE!</span>
+    <span class="opcode">return</span> <span class="register">v0</span>
+<span class="keyword">.end method</span>
+        </div>
+
+        <div class="highlight-box" style="border-color: rgba(255, 215, 0, 0.12);">
+            <span class="emoji">⚡</span> <strong>Alternative Patches:</strong><br />
+            If you can't find the method, try:
+            <br />
+            🔸 <strong>Modify the field</strong> in the constructor
+            <br />
+            🔸 <strong>Change the condition</strong> that checks the field
+            <br />
+            🔸 <strong>Search for the string</strong> that appears when locked
+            <br /><br />
+            Example: Search for <code>"Upgrade to Premium"</code> and trace back to the check!
+        </div>
+
+        <p><strong>Step 5: Rebuild and Sign</strong></p>
+
+        <div class="code-block">
+<span class="comment"># Rebuild the APK</span>
+<span class="label">apktool</span> b <span class="string">target_app</span> <span class="opcode">-o</span> <span class="string">mod_app.apk</span>
+
+<span class="comment"># Sign the APK (use your own keystore)</span>
+<span class="label">jarsigner</span> <span class="opcode">-verbose</span> <span class="opcode">-sigalg</span> SHA1withRSA <span class="opcode">-digestalg</span> SHA1 <span class="opcode">-keystore</span> <span class="string">my.keystore</span> <span class="string">mod_app.apk</span> <span class="string">alias_name</span>
+
+<span class="comment"># Or use APK Signer for easier signing</span>
+<span class="label">apksigner</span> sign <span class="opcode">--ks</span> <span class="string">my.keystore</span> <span class="string">mod_app.apk</span>
+        </div>
+
+        <p><strong>Step 6: Test the Mod</strong></p>
+
+        <div class="highlight-box" style="border-color: rgba(0, 200, 255, 0.12);">
+            <span class="emoji">✅</span> <strong>Testing Checklist:</strong><br />
+            🔸 Install the modded APK
+            <br />
+            🔸 Open the app and check if premium features are unlocked
+            <br />
+            🔸 Check if ads are removed (if that was your goal)
+            <br />
+            🔸 Test all features to ensure they work
+            <br />
+            🔸 If something doesn't work, go back to Step 3 and refine your patch
+        </div>
+
+        <div class="highlight-box" style="border-color: rgba(255, 215, 0, 0.12);">
+            <span class="emoji">🎉</span> <strong>Congratulations!</strong><br />
+            You've just modded your first app! 🔥
+            <br /><br />
+            Remember: <strong>Practice makes perfect</strong>. Keep trying different apps and techniques.
+            <br />
+            <strong>Every mod is a learning experience!</strong>
+        </div>
+    </div>
+
+    <!-- PREVIEW LESSON 20 -->
+    <div class="lesson-card" style="border-left-color: #00a3ff;">
+        <div class="lesson-number" style="color:#00a3ff;">🔮 Lesson 20 (Final Lesson)</div>
+        <h2 style="background: linear-gradient(135deg, #b0d0ff, #00a3ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Project 2: Advanced App Modding</h2>
+        <p>
+            In the <strong style="color:#00a3ff;">final lesson</strong>, you'll mod a <strong>more complex app</strong> with:
+            <br />
+            🔸 <strong>Obfuscation</strong> - Hidden method names
+            <br />
+            🔸 <strong>Multiple checks</strong> - Several verification layers
+            <br />
+            🔸 <strong>Server-side validation</strong> - Bypass both local and remote checks
+        </p>
+        <div class="highlight-box" style="border-color: rgba(0, 163, 255, 0.12);">
+            <span class="emoji">📌</span> <strong>You've Come So Far!</strong><br />
+            From knowing nothing about Smali to modding complex apps.
+            <br />
+            <strong>You're now a real modder! 😈</strong>
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <div class="footer">
+        <span class="sn">🔥 SN Mods</span> <span style="color:#4a5a6a;"> • </span>
+        <span class="heart">❤️</span> <span style="color:#4a5a6a;"> • </span>
+        <span class="tag">@Cyber_Ninja513</span><br />
+        <span style="color:#4a5a6a; font-size:0.7rem;">Smali Town • Lesson 19 of 20</span>
+    </div>
+
+</div>
+<script>
+    document.addEventListener('gesturestart', function(e){e.preventDefault();});
+    document.addEventListener('keydown', function(e){
+        if(e.ctrlKey && (e.key==='+'||e.key==='-'||e.key==='0')) e.preventDefault();
+    });
+    document.addEventListener('wheel', function(e){
+        if(e.ctrlKey) e.preventDefault();
+    }, {passive: false});
+    document.querySelector('.container').addEventListener('touchmove', function(e){
+        if(e.touches.length > 1) e.preventDefault();
+    }, {passive: false});
+    console.log('✅ SN Mods | Smali Town - Lesson 19 loaded');
+    console.log('😈 @Cyber_Ninja513');
+</script>
+</body>
+</html>

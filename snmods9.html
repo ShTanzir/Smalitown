@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>SN Mods | Smali Lesson 9</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0f0f2a;
+            color: #e0e6f0;
+            padding: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            overflow-y: auto;
+            overflow-x: hidden;
+            background-image:
+                radial-gradient(ellipse at 10% 20%, rgba(255, 0, 100, 0.06) 0%, transparent 50%),
+                radial-gradient(ellipse at 90% 80%, rgba(200, 0, 255, 0.06) 0%, transparent 50%);
+        }
+        .container {
+            max-width: 860px;
+            width: 100%;
+            background: rgba(20, 20, 50, 0.92);
+            backdrop-filter: blur(16px);
+            border-radius: 40px;
+            padding: 28px 26px;
+            border: 1px solid rgba(255, 0, 100, 0.06);
+            box-shadow: 0 30px 80px rgba(0,0,0,0.9);
+            margin: 10px 0;
+            position: relative;
+            overflow: hidden;
+        }
+        .container::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle at 30% 40%, rgba(255,0,100,0.02), transparent 60%),
+                        radial-gradient(circle at 70% 60%, rgba(200,0,255,0.02), transparent 60%);
+            pointer-events: none;
+            animation: rotateBg 30s linear infinite;
+        }
+        @keyframes rotateBg {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 2px solid rgba(255, 0, 100, 0.08);
+            padding-bottom: 18px;
+            margin-bottom: 28px;
+            flex-wrap: wrap;
+            gap: 12px;
+            position: relative;
+            z-index: 1;
+        }
+        .header .brand .logo {
+            font-size: 1.2rem;
+            color: #ff0064;
+            font-weight: 700;
+            background: rgba(255,0,100,0.06);
+            padding: 4px 14px;
+            border-radius: 50px;
+            border: 1px solid rgba(255,0,100,0.08);
+        }
+        .header h1 {
+            font-size: 1.8rem;
+            background: linear-gradient(135deg, #ff0064, #c800ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 900;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .header h1 .icon { font-size: 2rem; animation: pulse 2s infinite; }
+        @keyframes pulse { 0%,100%{transform:scale(1);} 50%{transform:scale(1.1) rotate(5deg);} }
+        .header .badge {
+            background: rgba(255,0,100,0.1);
+            padding: 6px 20px;
+            border-radius: 50px;
+            font-size: 0.8rem;
+            color: #ff0064;
+            border: 1px solid rgba(255,0,100,0.15);
+            font-weight: 600;
+        }
+        .lesson-card {
+            background: rgba(0,0,0,0.3);
+            border-radius: 24px;
+            padding: 24px 28px;
+            margin-bottom: 24px;
+            border-left: 5px solid #ff0064;
+            box-shadow: 0 8px 40px rgba(0,0,0,0.3);
+            position: relative;
+            z-index: 1;
+            transition: 0.3s;
+        }
+        .lesson-card:hover { transform: translateX(4px); border-left-color: #c800ff; }
+        .lesson-card .lesson-number {
+            font-size: 0.75rem;
+            color: #ff0064;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            font-weight: 700;
+            background: rgba(255,0,100,0.05);
+            display: inline-block;
+            padding: 4px 16px;
+            border-radius: 50px;
+            border: 1px solid rgba(255,0,100,0.06);
+            margin-bottom: 10px;
+        }
+        .lesson-card h2 {
+            font-size: 1.8rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #fff, #ff0064);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin: 6px 0 14px 0;
+        }
+        .lesson-card p { line-height: 2; color: #c8d4e8; font-size: 1.02rem; }
+        .lesson-card p strong { color: #ff0064; }
+        .highlight-box {
+            background: rgba(255,0,100,0.05);
+            border-radius: 16px;
+            padding: 16px 22px;
+            margin: 18px 0;
+            border: 1px solid rgba(255,0,100,0.06);
+            transition: 0.3s;
+        }
+        .highlight-box:hover { border-color: rgba(255,0,100,0.15); }
+        .highlight-box .emoji { font-size: 1.4rem; margin-right: 8px; }
+        .highlight-box strong { color: #ff0064; }
+        .highlight-box code {
+            color: #ff0064;
+            font-family: 'Fira Code', monospace;
+            background: rgba(0,0,0,0.4);
+            padding: 2px 12px;
+            border-radius: 6px;
+            font-size: 0.9rem;
+        }
+        .code-block {
+            background: #070b16;
+            border-radius: 18px;
+            padding: 20px 24px;
+            overflow-x: auto;
+            border: 1px solid rgba(255,0,100,0.04);
+            font-family: 'Fira Code', monospace;
+            font-size: 0.92rem;
+            direction: ltr;
+            text-align: left;
+            white-space: pre-wrap;
+            color: #d4e0ff;
+            margin: 16px 0;
+            box-shadow: inset 0 4px 30px rgba(0,0,0,0.6);
+            transition: 0.3s;
+        }
+        .code-block:hover { border-color: rgba(255,0,100,0.1); }
+        .code-block .comment { color: #4a7a8a; font-style: italic; }
+        .code-block .keyword { color: #ff79c6; font-weight: 700; }
+        .code-block .string { color: #f1fa8c; }
+        .code-block .number { color: #bd93f9; font-weight: 600; }
+        .code-block .class { color: #8be9fd; font-weight: 600; }
+        .code-block .method { color: #50fa7b; font-weight: 600; }
+        .code-block .opcode { color: #50fa7b; font-weight: 700; }
+        .code-block .register { color: #ffb86c; font-weight: 600; }
+        .code-block .label { color: #ffd700; font-weight: 600; }
+        .code-block .catch { color: #ff6fd8; font-weight: 700; }
+        .table-wrap {
+            overflow-x: auto;
+            margin: 18px 0;
+            border-radius: 18px;
+            border: 1px solid rgba(255,255,255,0.03);
+            box-shadow: 0 4px 30px rgba(0,0,0,0.2);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: rgba(0,0,0,0.25);
+            font-size: 0.95rem;
+        }
+        th {
+            background: rgba(255,0,100,0.06);
+            color: #ff0064;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            font-size: 0.75rem;
+            padding: 14px 18px;
+            border-bottom: 2px solid rgba(255,0,100,0.04);
+        }
+        td {
+            padding: 13px 18px;
+            border-bottom: 1px solid rgba(255,255,255,0.02);
+            color: #c8d4e8;
+        }
+        tr:hover td { background: rgba(255,0,100,0.02); }
+        td code {
+            color: #8be9fd;
+            font-family: 'Fira Code', monospace;
+            background: rgba(0,0,0,0.3);
+            padding: 2px 10px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 28px;
+            color: #4a5a6a;
+            font-size: 0.8rem;
+            border-top: 1px solid rgba(255,255,255,0.02);
+            padding-top: 20px;
+            position: relative;
+            z-index: 1;
+        }
+        .footer .sn {
+            background: linear-gradient(135deg, #ff0064, #c800ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 700;
+            font-size: 1rem;
+        }
+        .footer .heart { color: #ff2d75; animation: pulse 1.5s infinite; display: inline-block; }
+        .footer .tag { color: #88aaff; font-weight: 600; }
+        @media (max-width: 600px) {
+            .container { padding: 16px 14px; }
+            .header h1 { font-size: 1.4rem; }
+            .lesson-card h2 { font-size: 1.3rem; }
+            .lesson-card { padding: 18px 16px; }
+            .code-block { font-size: 0.75rem; padding: 14px 16px; }
+            .highlight-box { padding: 14px 16px; }
+            th, td { padding: 10px 12px; font-size: 0.85rem; }
+            .header .brand .logo { font-size: 0.9rem; }
+        }
+        ::-webkit-scrollbar { width: 5px; height: 5px; }
+        ::-webkit-scrollbar-track { background: rgba(255,255,255,0.02); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb { background: linear-gradient(180deg, #ff0064, #c800ff); border-radius: 10px; }
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <!-- HEADER -->
+    <div class="header">
+        <div class="brand"><span class="logo">🔥 SN Mods</span></div>
+        <h1><span class="icon">🏘️</span> Smali Town</h1>
+        <span class="badge">📘 Lesson 9 / 20</span>
+    </div>
+
+    <!-- LESSON 9 -->
+    <div class="lesson-card">
+        <div class="lesson-number">📖 Lesson 9</div>
+        <h2>try/catch & Error Handling</h2>
+
+        <p>
+            <strong>Error handling</strong> is how apps deal with crashes and unexpected situations.
+            In Smali, this is done with <strong>try/catch</strong> blocks.
+        </p>
+
+        <div class="highlight-box">
+            <span class="emoji">🛡️</span> <strong>Why error handling matters for modding:</strong><br />
+            Some apps use <strong>try/catch</strong> to hide premium features or to check if your modifications are valid.
+            By understanding how to <strong>remove or bypass</strong> these checks, you can <strong>prevent crashes</strong> and <strong>unlock content</strong>!
+        </div>
+
+        <p><strong>Structure of try/catch in Smali:</strong></p>
+
+        <div class="code-block">
+<span class="comment"># Start of try block</span>
+<span class="label">:try_start_0</span>
+<span class="opcode">invoke-virtual</span> {<span class="register">p0</span>}, <span class="class">Lcom/example/User;</span><span class="opcode">-</span><span class="method">getPremium</span>()<span class="class">Z</span>
+<span class="opcode">move-result</span> <span class="register">v0</span>
+<span class="label">:try_end_0</span>
+
+<span class="comment"># Catch block (if exception occurs)</span>
+<span class="catch">.catch</span> <span class="class">Ljava/lang/Exception;</span> <span class="opcode">{:try_start_0 .. :try_end_0}</span> <span class="class">:catch_0</span>
+
+<span class="label">:catch_0</span>
+<span class="comment"># Handle the error: set default value</span>
+<span class="opcode">const/4</span> <span class="register">v0</span>, <span class="number">0x0</span>
+<span class="opcode">return</span> <span class="register">v0</span>
+        </div>
+
+        <div class="highlight-box" style="border-color: rgba(255, 215, 0, 0.12);">
+            <span class="emoji">🔥</span> <strong>Modding Technique:</strong><br />
+            If you see a <code>.catch</code> block that returns <code>false</code> when an error occurs,
+            <strong>remove the .catch block</strong> or <strong>change the catch block</strong> to return <code>true</code>!
+        </div>
+
+        <p><strong>Common try/catch Patterns:</strong></p>
+
+        <div class="table-wrap">
+            <table>
+                <thead><tr><th>Pattern</th><th>What It Means</th><th>Modding Strategy</th></tr></thead>
+                <tbody>
+                    <tr><td><code>.catch Ljava/lang/Exception;</code></td><td>Catches any error</td><td>Remove or modify the catch block</td></tr>
+                    <tr><td><code>.catch Ljava/lang/NullPointerException;</code></td><td>Catches null errors</td><td>Ensure the value is never null</td></tr>
+                    <tr><td><code>return-void</code> in catch</td><td>Method returns nothing on error</td><td>Change to return a success value</td></tr>
+                    <tr><td><code>goto :label</code> in catch</td><td>Jumps to a label on error</td><td>Change the jump to bypass error handling</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="highlight-box" style="border-color: rgba(0, 200, 255, 0.12);">
+            <span class="emoji">💡</span> <strong>Pro Tip:</strong><br />
+            Some apps use <strong>try/catch</strong> to hide premium features from modders.
+            <br />
+            Look for <code>.catch</code> blocks that return <code>false</code> or <code>0</code>.
+            <br />
+            <strong>Change them to return true!</strong>
+        </div>
+
+        <p><strong>Example: Bypassing a License Check</strong></p>
+
+        <div class="code-block">
+<span class="comment"># License check with try/catch</span>
+<span class="label">:try_start_0</span>
+<span class="opcode">invoke-virtual</span> {<span class="register">p0</span>}, <span class="class">Lcom/example/License;</span><span class="opcode">-</span><span class="method">verify</span>()<span class="class">Z</span>
+<span class="opcode">move-result</span> <span class="register">v0</span>
+<span class="label">:try_end_0</span>
+
+<span class="catch">.catch</span> <span class="class">Ljava/lang/Exception;</span> <span class="opcode">{:try_start_0 .. :try_end_0}</span> <span class="class">:catch_0</span>
+
+<span class="comment"># If check passes, return true</span>
+<span class="opcode">return</span> <span class="register">v0</span>
+
+<span class="label">:catch_0</span>
+<span class="comment"># If error occurs, return false</span>
+<span class="opcode">const/4</span> <span class="register">v0</span>, <span class="number">0x0</span>
+<span class="opcode">return</span> <span class="register">v0</span>
+        </div>
+
+        <div class="highlight-box" style="border-color: rgba(255, 215, 0, 0.12);">
+            <span class="emoji">⚡</span> <strong>Quick Mod:</strong><br />
+            Change the catch block to:<br />
+            <code>const/4 v0, 0x1</code><br />
+            <code>return v0</code>
+            <br /><br />
+            Now the license check <strong>always returns TRUE</strong> even if it fails! ✅
+        </div>
+    </div>
+
+    <!-- PREVIEW LESSON 10 -->
+    <div class="lesson-card" style="border-left-color: #c800ff;">
+        <div class="lesson-number" style="color:#c800ff;">🔮 Lesson 10 (Preview)</div>
+        <h2 style="background: linear-gradient(135deg, #d0b0ff, #c800ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Classes & Interfaces</h2>
+        <p>
+            In Lesson 10, we'll learn about <strong style="color:#c800ff;">classes</strong> and <strong style="color:#c800ff;">interfaces</strong> in Smali.
+            You'll understand how objects work and how to modify class structures.
+        </p>
+        <div class="highlight-box" style="border-color: rgba(200, 0, 255, 0.12);">
+            <span class="emoji">📌</span> <strong>Key OpCodes:</strong><br />
+            <code>new-instance</code> → Create an object<br />
+            <code>instanceof</code> → Check object type<br />
+            <code>check-cast</code> → Cast an object to a type
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <div class="footer">
+        <span class="sn">🔥 SN Mods</span> <span style="color:#4a5a6a;"> • </span>
+        <span class="heart">❤️</span> <span style="color:#4a5a6a;"> • </span>
+        <span class="tag">@Cyber_Ninja513</span><br />
+        <span style="color:#4a5a6a; font-size:0.7rem;">Smali Town • Lesson 9 of 20</span>
+    </div>
+
+</div>
+<script>
+    document.addEventListener('gesturestart', function(e){e.preventDefault();});
+    document.addEventListener('keydown', function(e){
+        if(e.ctrlKey && (e.key==='+'||e.key==='-'||e.key==='0')) e.preventDefault();
+    });
+    document.addEventListener('wheel', function(e){
+        if(e.ctrlKey) e.preventDefault();
+    }, {passive: false});
+    document.querySelector('.container').addEventListener('touchmove', function(e){
+        if(e.touches.length > 1) e.preventDefault();
+    }, {passive: false});
+    console.log('✅ SN Mods | Smali Town - Lesson 9 loaded');
+    console.log('😈 @Cyber_Ninja513');
+</script>
+</body>
+</html>

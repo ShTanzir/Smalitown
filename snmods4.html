@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>SN Mods | Smali Lesson 4</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #1a1a3e;
+            color: #e0e6f0;
+            padding: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            overflow-y: auto;
+            overflow-x: hidden;
+            background-image: 
+                radial-gradient(ellipse at 10% 20%, rgba(255, 45, 117, 0.05) 0%, transparent 50%),
+                radial-gradient(ellipse at 90% 80%, rgba(255, 107, 0, 0.05) 0%, transparent 50%);
+        }
+
+        .container {
+            max-width: 860px;
+            width: 100%;
+            background: rgba(30, 30, 60, 0.92);
+            backdrop-filter: blur(16px);
+            border-radius: 40px;
+            padding: 28px 26px;
+            border: 1px solid rgba(255, 45, 117, 0.06);
+            box-shadow: 
+                0 30px 80px rgba(0, 0, 0, 0.9),
+                inset 0 1px 0 rgba(255, 255, 255, 0.03),
+                0 0 60px rgba(255, 45, 117, 0.02);
+            margin: 10px 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .container::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: 
+                radial-gradient(circle at 30% 40%, rgba(255, 45, 117, 0.02) 0%, transparent 60%),
+                radial-gradient(circle at 70% 60%, rgba(255, 107, 0, 0.02) 0%, transparent 60%);
+            pointer-events: none;
+            animation: rotateBg 30s linear infinite;
+        }
+
+        @keyframes rotateBg {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* ===== HEADER ===== */
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 2px solid rgba(255, 45, 117, 0.08);
+            padding-bottom: 18px;
+            margin-bottom: 28px;
+            flex-wrap: wrap;
+            gap: 12px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header .brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .header .brand .logo {
+            font-size: 1.2rem;
+            color: #ff2d75;
+            font-weight: 700;
+            background: rgba(255, 45, 117, 0.06);
+            padding: 4px 14px;
+            border-radius: 50px;
+            border: 1px solid rgba(255, 45, 117, 0.08);
+        }
+
+        .header h1 {
+            font-size: 1.8rem;
+            background: linear-gradient(135deg, #ff2d75 0%, #ff6b00 50%, #ffd700 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 900;
+            letter-spacing: -0.5px;
+            text-shadow: 0 0 40px rgba(255, 45, 117, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .header h1 .icon {
+            font-size: 2rem;
+            -webkit-text-fill-color: initial;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1) rotate(5deg); }
+        }
+
+        .header .badge {
+            background: linear-gradient(135deg, rgba(255, 45, 117, 0.1), rgba(255, 107, 0, 0.1));
+            padding: 6px 20px;
+            border-radius: 50px;
+            font-size: 0.8rem;
+            color: #ff2d75;
+            border: 1px solid rgba(255, 45, 117, 0.15);
+            backdrop-filter: blur(4px);
+            font-weight: 600;
+            letter-spacing: 1px;
+            box-shadow: 0 0 30px rgba(255, 45, 117, 0.03);
+        }
+
+        /* ===== LESSON CARD ===== */
+        .lesson-card {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 24px;
+            padding: 24px 28px;
+            margin-bottom: 24px;
+            border-left: 5px solid;
+            border-image: linear-gradient(180deg, #ff2d75, #ff6b00) 1;
+            border-left: 5px solid #ff2d75;
+            box-shadow: 0 8px 40px rgba(0, 0, 0, 0.3);
+            position: relative;
+            z-index: 1;
+            transition: all 0.4s ease;
+        }
+
+        .lesson-card:hover {
+            transform: translateX(4px);
+            box-shadow: 0 12px 50px rgba(255, 45, 117, 0.05);
+            border-left-color: #ff6b00;
+        }
+
+        .lesson-card .lesson-number {
+            font-size: 0.75rem;
+            color: #ff2d75;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            font-weight: 700;
+            background: rgba(255, 45, 117, 0.05);
+            display: inline-block;
+            padding: 4px 16px;
+            border-radius: 50px;
+            border: 1px solid rgba(255, 45, 117, 0.06);
+            margin-bottom: 10px;
+        }
+
+        .lesson-card h2 {
+            font-size: 1.8rem;
+            color: #f0f5ff;
+            margin: 6px 0 14px 0;
+            font-weight: 800;
+            background: linear-gradient(135deg, #e8f0ff 0%, #ff2d75 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .lesson-card p {
+            line-height: 2;
+            color: #c8d4e8;
+            font-size: 1.02rem;
+        }
+
+        .lesson-card p strong {
+            color: #ff2d75;
+            font-weight: 700;
+        }
+
+        /* ===== HIGHLIGHT BOX ===== */
+        .highlight-box {
+            background: linear-gradient(135deg, rgba(255, 45, 117, 0.05), rgba(255, 107, 0, 0.04));
+            border-radius: 16px;
+            padding: 16px 22px;
+            margin: 18px 0;
+            border: 1px solid rgba(255, 45, 117, 0.06);
+            box-shadow: inset 0 0 40px rgba(255, 45, 117, 0.01);
+            transition: all 0.3s ease;
+        }
+
+        .highlight-box:hover {
+            border-color: rgba(255, 45, 117, 0.15);
+            box-shadow: 0 0 40px rgba(255, 45, 117, 0.02), inset 0 0 40px rgba(255, 45, 117, 0.01);
+        }
+
+        .highlight-box .emoji {
+            font-size: 1.4rem;
+            margin-right: 8px;
+        }
+
+        .highlight-box strong {
+            color: #ff2d75;
+            font-weight: 700;
+        }
+
+        .highlight-box code {
+            color: #ff2d75;
+            font-family: 'Fira Code', 'Cascadia Code', monospace;
+            background: rgba(0, 0, 0, 0.4);
+            padding: 2px 12px;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            border: 1px solid rgba(255, 45, 117, 0.04);
+        }
+
+        /* ===== CODE BLOCK ===== */
+        .code-block {
+            background: #070b16;
+            border-radius: 18px;
+            padding: 20px 24px;
+            overflow-x: auto;
+            border: 1px solid rgba(255, 45, 117, 0.04);
+            font-family: 'Fira Code', 'Cascadia Code', monospace;
+            font-size: 0.92rem;
+            direction: ltr;
+            text-align: left;
+            white-space: pre-wrap;
+            color: #d4e0ff;
+            margin: 16px 0;
+            box-shadow: 
+                inset 0 4px 30px rgba(0, 0, 0, 0.6),
+                0 0 40px rgba(255, 45, 117, 0.01);
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .code-block:hover {
+            border-color: rgba(255, 45, 117, 0.1);
+            box-shadow: 
+                inset 0 4px 30px rgba(0, 0, 0, 0.6),
+                0 0 60px rgba(255, 45, 117, 0.02);
+        }
+
+        .code-block .comment { color: #4a7a8a; font-style: italic; }
+        .code-block .keyword { color: #ff79c6; font-weight: 700; }
+        .code-block .string { color: #f1fa8c; }
+        .code-block .number { color: #bd93f9; font-weight: 600; }
+        .code-block .class { color: #8be9fd; font-weight: 600; }
+        .code-block .method { color: #50fa7b; font-weight: 600; }
+        .code-block .opcode { color: #50fa7b; font-weight: 700; }
+        .code-block .register { color: #ffb86c; font-weight: 600; }
+        .code-block .label { color: #ffd700; font-weight: 600; }
+
+        /* ===== TABLE ===== */
+        .table-wrap {
+            overflow-x: auto;
+            margin: 18px 0;
+            border-radius: 18px;
+            border: 1px solid rgba(255, 255, 255, 0.03);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: rgba(0, 0, 0, 0.25);
+            font-size: 0.95rem;
+        }
+
+        th {
+            background: linear-gradient(135deg, rgba(255, 45, 117, 0.06), rgba(255, 107, 0, 0.06));
+            color: #ff2d75;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            font-size: 0.75rem;
+            padding: 14px 18px;
+            border-bottom: 2px solid rgba(255, 45, 117, 0.04);
+        }
+
+        td {
+            padding: 13px 18px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.02);
+            color: #c8d4e8;
+        }
+
+        tr:hover td {
+            background: rgba(255, 45, 117, 0.02);
+        }
+
+        td code {
+            color: #8be9fd;
+            font-family: 'Fira Code', monospace;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 2px 10px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+        }
+
+        .opcode-highlight {
+            color: #50fa7b;
+            font-weight: 700;
+        }
+
+        /* ===== FOOTER ===== */
+        .footer {
+            text-align: center;
+            margin-top: 28px;
+            color: #3a4a5a;
+            font-size: 0.8rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.02);
+            padding-top: 20px;
+            position: relative;
+            z-index: 1;
+            letter-spacing: 0.5px;
+        }
+
+        .footer .sn {
+            background: linear-gradient(135deg, #ff2d75, #ff6b00);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 700;
+            font-size: 1rem;
+        }
+
+        .footer .heart {
+            color: #ff2d75;
+            -webkit-text-fill-color: initial;
+            animation: pulse 1.5s ease-in-out infinite;
+            display: inline-block;
+        }
+
+        .footer .tag {
+            color: #88aaff;
+            font-weight: 600;
+        }
+
+        @media (max-width: 600px) {
+            .container { padding: 16px 14px; }
+            .header h1 { font-size: 1.4rem; }
+            .lesson-card h2 { font-size: 1.3rem; }
+            .lesson-card { padding: 18px 16px; }
+            .code-block { font-size: 0.75rem; padding: 14px 16px; }
+            .highlight-box { padding: 14px 16px; }
+            th, td { padding: 10px 12px; font-size: 0.85rem; }
+            .header .brand .logo { font-size: 0.9rem; }
+        }
+
+        ::-webkit-scrollbar {
+            width: 5px;
+            height: 5px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, #ff2d75, #ff6b00);
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(180deg, #ff4d8a, #ff8c1a);
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <!-- ===== HEADER ===== -->
+    <div class="header">
+        <div class="brand">
+            <span class="logo">🔥 SN Mods</span>
+        </div>
+        <h1>
+            <span class="icon">🏘️</span>
+            Smali Town
+        </h1>
+        <span class="badge">📘 Lesson 4 / 20</span>
+    </div>
+
+    <!-- ===== LESSON 4 ===== -->
+    <div class="lesson-card">
+        <div class="lesson-number">📖 Lesson 4</div>
+        <h2>Conditional Statements (if/else)</h2>
+
+        <p>
+            <strong>Conditional statements</strong> are used to make decisions in Smali code.
+            They check if something is <strong>true</strong> or <strong>false</strong> and execute different code based on the result.
+        </p>
+
+        <div class="highlight-box">
+            <span class="emoji">🎯</span> <strong>Why this is important for modding:</strong><br />
+            Most premium features are protected by <strong>if statements</strong> that check:
+            <br />
+            ✅ <code>if user is VIP → show premium</code>
+            <br />
+            ❌ <code>if user is NOT VIP → show ads</code>
+            <br /><br />
+            By <strong>reversing</strong> or <strong>removing</strong> these checks, you can unlock everything!
+        </div>
+
+        <p><strong>Common Conditional OpCodes:</strong></p>
+
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr><th>OpCode</th><th>Condition</th><th>When it jumps</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><span class="opcode-highlight">if-eqz</span></td>
+                        <td>if <strong>equals zero</strong></td>
+                        <td>When register == 0</td>
+                    </tr>
+                    <tr>
+                        <td><span class="opcode-highlight">if-nez</span></td>
+                        <td>if <strong>not equals zero</strong></td>
+                        <td>When register != 0</td>
+                    </tr>
+                    <tr>
+                        <td><span class="opcode-highlight">if-eq</span></td>
+                        <td>if <strong>equal</strong></td>
+                        <td>When vA == vB</td>
+                    </tr>
+                    <tr>
+                        <td><span class="opcode-highlight">if-ne</span></td>
+                        <td>if <strong>not equal</strong></td>
+                        <td>When vA != vB</td>
+                    </tr>
+                    <tr>
+                        <td><span class="opcode-highlight">if-gt</span></td>
+                        <td>if <strong>greater than</strong></td>
+                        <td>When vA > vB</td>
+                    </tr>
+                    <tr>
+                        <td><span class="opcode-highlight">if-lt</span></td>
+                        <td>if <strong>less than</strong></td>
+                        <td>When vA < vB</td>
+                    </tr>
+                    <tr>
+                        <td><span class="opcode-highlight">if-ge</span></td>
+                        <td>if <strong>greater or equal</strong></td>
+                        <td>When vA >= vB</td>
+                    </tr>
+                    <tr>
+                        <td><span class="opcode-highlight">if-le</span></td>
+                        <td>if <strong>less or equal</strong></td>
+                        <td>When vA <= vB</td>
+                    </tr>
+                    <tr>
+                        <td><span class="opcode-highlight">goto</span></td>
+                        <td><strong>unconditional</strong></td>
+                        <td>Always jumps</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="highlight-box" style="border-color: rgba(255, 215, 0, 0.12);">
+            <span class="emoji">🔥</span> <strong style="color: #ffd700;">Pro Modding Trick:</strong><br />
+            Change <code style="color: #ffb86c;">if-eqz</code> to <code style="color: #ffb86c;">if-nez</code> to <strong>reverse the logic</strong>!
+            <br /><br />
+            Original: <code>if-eqz v0, :not_vip  <span style="color: #4a7a8a;"># if NOT VIP, show ads</span></code><br />
+            Modified: <code>if-nez v0, :not_vip  <span style="color: #4a7a8a;"># if IS VIP, show ads (reversed!)</span></code>
+            <br /><br />
+            Or simply <strong>remove the check entirely</strong> by replacing with <code>goto</code>!
+        </div>
+
+        <p><strong>Example: VIP check in Smali</strong></p>
+
+        <div class="code-block">
+<span class="comment"># Method: checkVIP() returns String</span>
+<span class="keyword">.method</span> <span class="keyword">public</span> <span class="method">checkVIP</span>()<span class="class">Ljava/lang/String;</span>
+    <span class="opcode">.locals</span> <span class="number">2</span>
+    <span class="opcode">.prologue</span>
+
+    <span class="comment"># Get the VIP status field</span>
+    <span class="opcode">iget</span> <span class="register">v0</span>, <span class="register">p0</span>, <span class="class">Lcom/example/User;</span><span class="opcode">-</span><span class="register">is_vip</span>:<span class="class">Z</span>
+
+    <span class="comment"># If v0 == 0 (not VIP), jump to :not_vip</span>
+    <span class="opcode">if-eqz</span> <span class="register">v0</span>, <span class="label">:not_vip</span>
+
+    <span class="comment"># User IS VIP</span>
+    <span class="opcode">const-string</span> <span class="register">v1</span>, <span class="string">"Welcome VIP User! 🎉"</span>
+    <span class="opcode">return</span> <span class="register">v1</span>
+
+    <span class="label">:not_vip</span>
+    <span class="comment"># User is NOT VIP</span>
+    <span class="opcode">const-string</span> <span class="register">v1</span>, <span class="string">"Please upgrade to VIP"</span>
+    <span class="opcode">return</span> <span class="register">v1</span>
+<span class="keyword">.end method</span>
+        </div>
+
+        <div class="highlight-box" style="border-color: rgba(0, 200, 255, 0.12);">
+            <span class="emoji">💡</span> <strong>How to mod this:</strong><br />
+            <strong>Option 1:</strong> Change <code>if-eqz v0, :not_vip</code> to <code>if-nez v0, :not_vip</code>
+            <br />
+            <strong>Option 2:</strong> Change the field value: <code>const/4 v0, 0x0</code> to <code>const/4 v0, 0x1</code>
+            <br />
+            <strong>Option 3:</strong> Remove the check entirely and always return VIP message!
+        </div>
+
+        <p><strong>Another Example: Level Check</strong></p>
+
+        <div class="code-block">
+<span class="comment"># Check if user level is high enough</span>
+<span class="opcode">iget</span> <span class="register">v0</span>, <span class="register">p0</span>, <span class="class">Lcom/example/User;</span><span class="opcode">-</span><span class="register">level</span>:<span class="class">I</span>
+
+<span class="comment"># If level >= 10, show premium</span>
+<span class="opcode">const/16</span> <span class="register">v1</span>, <span class="number">0xA</span>  <span class="comment"># 10</span>
+<span class="opcode">if-ge</span> <span class="register">v0</span>, <span class="register">v1</span>, <span class="label">:premium</span>
+
+<span class="comment"># Not high enough</span>
+<span class="opcode">const-string</span> <span class="register">v2</span>, <span class="string">"Level 10 required"</span>
+<span class="opcode">return</span> <span class="register">v2</span>
+
+<span class="label">:premium</span>
+<span class="opcode">const-string</span> <span class="register">v2</span>, <span class="string">"Premium Unlocked!"</span>
+<span class="opcode">return</span> <span class="register">v2</span>
+        </div>
+
+        <div class="highlight-box" style="border-color: rgba(255, 215, 0, 0.12);">
+            <span class="emoji">⚡</span> <strong style="color: #ffd700;">Quick Mod:</strong><br />
+            Change <code>if-ge v0, v1, :premium</code> to <code>goto :premium</code>
+            <br />
+            This will <strong>always</strong> go to the premium section, bypassing the level check! ✅
+        </div>
+    </div>
+
+    <!-- ===== PREVIEW LESSON 5 ===== -->
+    <div class="lesson-card" style="border-left-color: #ffd700; border-image: linear-gradient(180deg, #ffd700, #ff8c00) 1; border-left: 5px solid #ffd700;">
+        <div class="lesson-number" style="color: #ffd700;">🔮 Lesson 5 (Preview)</div>
+        <h2 style="background: linear-gradient(135deg, #fff0b0, #ffd700); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Working with Methods</h2>
+        <p>
+            In Lesson 5, we'll learn about <strong style="color: #ffd700;">calling methods</strong> in Smali.
+            This is how you call functions from other classes.
+        </p>
+
+        <div class="code-block" style="border-color: rgba(255, 215, 0, 0.1);">
+<span class="comment"># Calling a method: getUserLevel()</span>
+<span class="opcode">invoke-virtual</span> <span class="opcode">{</span><span class="register">p0</span><span class="opcode">}</span>, <span class="class">Lcom/example/User;</span><span class="opcode">-</span><span class="method">getLevel</span>()<span class="class">I</span>
+<span class="opcode">move-result</span> <span class="register">v0</span>
+
+<span class="comment"># Now v0 holds the user level!</span>
+        </div>
+
+        <div class="highlight-box" style="border-color: rgba(255, 215, 0, 0.12);">
+            <span class="emoji">📌</span> <strong style="color: #ffd700;">Key OpCodes:</strong><br />
+            <code style="color: #ffb86c;">invoke-virtual</code> → Call a method<br />
+            <code style="color: #ffb86c;">invoke-static</code> → Call a static method<br />
+            <code style="color: #ffb86c;">move-result</code> → Get the return value<br />
+            <code style="color: #ffb86c;">move-result-object</code> → Get an object return value
+        </div>
+    </div>
+
+    <!-- ===== FOOTER ===== -->
+    <div class="footer">
+        <span class="sn">🔥 SN Mods</span>
+        <span style="color: #4a5a6a;"> • </span>
+        <span class="heart">❤️</span>
+        <span style="color: #4a5a6a;"> • </span>
+        <span class="tag">@Cyber_Ninja513</span>
+        <br />
+        <span style="color: #4a5a6a; font-size: 0.7rem;">Smali Town • Lesson 4 of 20</span>
+    </div>
+
+</div>
+
+<script>
+    document.addEventListener('gesturestart', function(e) { e.preventDefault(); });
+    document.addEventListener('keydown', function(e) {
+        if (e.ctrlKey && (e.key === '+' || e.key === '-' || e.key === '0')) {
+            e.preventDefault();
+        }
+    });
+    document.addEventListener('wheel', function(e) {
+        if (e.ctrlKey) e.preventDefault();
+    }, { passive: false });
+
+    document.querySelector('.container').addEventListener('touchmove', function(e) {
+        if (e.touches.length > 1) {
+            e.preventDefault();
+        }
+    }, { passive: false });
+
+    console.log('✅ SN Mods | Smali Town - Lesson 4 loaded');
+    console.log('😈 @Cyber_Ninja513');
+</script>
+
+</body>
+</html>

@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>SN Mods | Smali Lesson 20</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0f0f2a;
+            color: #e0e6f0;
+            padding: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            overflow-y: auto;
+            overflow-x: hidden;
+            background-image:
+                radial-gradient(ellipse at 10% 20%, rgba(255, 215, 0, 0.08) 0%, transparent 50%),
+                radial-gradient(ellipse at 90% 80%, rgba(255, 215, 0, 0.08) 0%, transparent 50%);
+        }
+        .container {
+            max-width: 860px;
+            width: 100%;
+            background: rgba(20, 20, 50, 0.92);
+            backdrop-filter: blur(16px);
+            border-radius: 40px;
+            padding: 28px 26px;
+            border: 2px solid rgba(255, 215, 0, 0.15);
+            box-shadow: 0 30px 80px rgba(0,0,0,0.9), 0 0 60px rgba(255,215,0,0.05);
+            margin: 10px 0;
+            position: relative;
+            overflow: hidden;
+        }
+        .container::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle at 30% 40%, rgba(255,215,0,0.03), transparent 60%),
+                        radial-gradient(circle at 70% 60%, rgba(255,215,0,0.03), transparent 60%);
+            pointer-events: none;
+            animation: rotateBg 30s linear infinite;
+        }
+        @keyframes rotateBg {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 2px solid rgba(255, 215, 0, 0.15);
+            padding-bottom: 18px;
+            margin-bottom: 28px;
+            flex-wrap: wrap;
+            gap: 12px;
+            position: relative;
+            z-index: 1;
+        }
+        .header .brand .logo {
+            font-size: 1.2rem;
+            color: #ffd700;
+            font-weight: 700;
+            background: rgba(255,215,0,0.1);
+            padding: 4px 14px;
+            border-radius: 50px;
+            border: 1px solid rgba(255,215,0,0.15);
+        }
+        .header h1 {
+            font-size: 1.8rem;
+            background: linear-gradient(135deg, #ffd700, #ff6b00);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 900;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .header h1 .icon { font-size: 2rem; animation: pulse 2s infinite; }
+        @keyframes pulse { 0%,100%{transform:scale(1);} 50%{transform:scale(1.1) rotate(5deg);} }
+        .header .badge {
+            background: rgba(255,215,0,0.15);
+            padding: 6px 20px;
+            border-radius: 50px;
+            font-size: 0.8rem;
+            color: #ffd700;
+            border: 1px solid rgba(255,215,0,0.2);
+            font-weight: 700;
+            text-shadow: 0 0 20px rgba(255,215,0,0.2);
+        }
+        .lesson-card {
+            background: rgba(0,0,0,0.3);
+            border-radius: 24px;
+            padding: 24px 28px;
+            margin-bottom: 24px;
+            border-left: 5px solid #ffd700;
+            box-shadow: 0 8px 40px rgba(0,0,0,0.3);
+            position: relative;
+            z-index: 1;
+            transition: 0.3s;
+        }
+        .lesson-card:hover { transform: translateX(4px); border-left-color: #ff6b00; }
+        .lesson-card .lesson-number {
+            font-size: 0.75rem;
+            color: #ffd700;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            font-weight: 700;
+            background: rgba(255,215,0,0.08);
+            display: inline-block;
+            padding: 4px 16px;
+            border-radius: 50px;
+            border: 1px solid rgba(255,215,0,0.1);
+            margin-bottom: 10px;
+        }
+        .lesson-card h2 {
+            font-size: 1.8rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #fff, #ffd700);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin: 6px 0 14px 0;
+        }
+        .lesson-card p { line-height: 2; color: #c8d4e8; font-size: 1.02rem; }
+        .lesson-card p strong { color: #ffd700; }
+        .highlight-box {
+            background: rgba(255,215,0,0.06);
+            border-radius: 16px;
+            padding: 16px 22px;
+            margin: 18px 0;
+            border: 1px solid rgba(255,215,0,0.08);
+            transition: 0.3s;
+        }
+        .highlight-box:hover { border-color: rgba(255,215,0,0.2); }
+        .highlight-box .emoji { font-size: 1.4rem; margin-right: 8px; }
+        .highlight-box strong { color: #ffd700; }
+        .highlight-box code {
+            color: #ffd700;
+            font-family: 'Fira Code', monospace;
+            background: rgba(0,0,0,0.4);
+            padding: 2px 12px;
+            border-radius: 6px;
+            font-size: 0.9rem;
+        }
+        .code-block {
+            background: #070b16;
+            border-radius: 18px;
+            padding: 20px 24px;
+            overflow-x: auto;
+            border: 1px solid rgba(255,215,0,0.06);
+            font-family: 'Fira Code', monospace;
+            font-size: 0.92rem;
+            direction: ltr;
+            text-align: left;
+            white-space: pre-wrap;
+            color: #d4e0ff;
+            margin: 16px 0;
+            box-shadow: inset 0 4px 30px rgba(0,0,0,0.6);
+            transition: 0.3s;
+        }
+        .code-block:hover { border-color: rgba(255,215,0,0.12); }
+        .code-block .comment { color: #4a7a8a; font-style: italic; }
+        .code-block .keyword { color: #ff79c6; font-weight: 700; }
+        .code-block .string { color: #f1fa8c; }
+        .code-block .number { color: #bd93f9; font-weight: 600; }
+        .code-block .class { color: #8be9fd; font-weight: 600; }
+        .code-block .method { color: #50fa7b; font-weight: 600; }
+        .code-block .opcode { color: #50fa7b; font-weight: 700; }
+        .code-block .register { color: #ffb86c; font-weight: 600; }
+        .code-block .label { color: #ffd700; font-weight: 600; }
+        .table-wrap {
+            overflow-x: auto;
+            margin: 18px 0;
+            border-radius: 18px;
+            border: 1px solid rgba(255,255,255,0.03);
+            box-shadow: 0 4px 30px rgba(0,0,0,0.2);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: rgba(0,0,0,0.25);
+            font-size: 0.95rem;
+        }
+        th {
+            background: rgba(255,215,0,0.08);
+            color: #ffd700;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            font-size: 0.75rem;
+            padding: 14px 18px;
+            border-bottom: 2px solid rgba(255,215,0,0.06);
+        }
+        td {
+            padding: 13px 18px;
+            border-bottom: 1px solid rgba(255,255,255,0.02);
+            color: #c8d4e8;
+        }
+        tr:hover td { background: rgba(255,215,0,0.03); }
+        td code {
+            color: #8be9fd;
+            font-family: 'Fira Code', monospace;
+            background: rgba(0,0,0,0.3);
+            padding: 2px 10px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+        }
+        .celebration {
+            background: linear-gradient(135deg, rgba(255,215,0,0.1), rgba(255,107,0,0.08));
+            border-radius: 16px;
+            padding: 20px 24px;
+            margin: 18px 0;
+            border: 1px solid rgba(255,215,0,0.15);
+            text-align: center;
+        }
+        .celebration h3 { color: #ffd700; font-size: 1.5rem; margin-bottom: 8px; }
+        .celebration p { color: #c8d4e8; font-size: 1rem; }
+        .footer {
+            text-align: center;
+            margin-top: 28px;
+            color: #4a5a6a;
+            font-size: 0.8rem;
+            border-top: 2px solid rgba(255,215,0,0.1);
+            padding-top: 20px;
+            position: relative;
+            z-index: 1;
+        }
+        .footer .sn {
+            background: linear-gradient(135deg, #ffd700, #ff6b00);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 700;
+            font-size: 1.2rem;
+        }
+        .footer .heart { color: #ff2d75; animation: pulse 1.5s infinite; display: inline-block; }
+        .footer .tag { color: #88aaff; font-weight: 600; }
+        .badge-gold {
+            background: linear-gradient(135deg, #ffd700, #ff8c00);
+            color: #0f0f2a;
+            padding: 2px 12px;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 0.8rem;
+        }
+        @media (max-width: 600px) {
+            .container { padding: 16px 14px; }
+            .header h1 { font-size: 1.4rem; }
+            .lesson-card h2 { font-size: 1.3rem; }
+            .lesson-card { padding: 18px 16px; }
+            .code-block { font-size: 0.75rem; padding: 14px 16px; }
+            .highlight-box { padding: 14px 16px; }
+            th, td { padding: 10px 12px; font-size: 0.85rem; }
+            .header .brand .logo { font-size: 0.9rem; }
+        }
+        ::-webkit-scrollbar { width: 5px; height: 5px; }
+        ::-webkit-scrollbar-track { background: rgba(255,255,255,0.02); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb { background: linear-gradient(180deg, #ffd700, #ff6b00); border-radius: 10px; }
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <!-- HEADER -->
+    <div class="header">
+        <div class="brand"><span class="logo">🔥 SN Mods</span></div>
+        <h1><span class="icon">🏘️</span> Smali Town</h1>
+        <span class="badge">🏆 Lesson 20 / 20</span>
+    </div>
+
+    <!-- LESSON 20 -->
+    <div class="lesson-card">
+        <div class="lesson-number">📖 Lesson 20 - THE FINAL LESSON</div>
+        <h2>Project 2: Advanced App Modding</h2>
+
+        <p>
+            <strong>This is it! The final challenge!</strong>
+            <br />
+            You've learned <strong>everything</strong> from basic Smali to advanced techniques.
+            Now it's time to apply all your knowledge to a <strong>complex, real-world app</strong>.
+        </p>
+
+        <div class="celebration">
+            <h3>🏆 You Made It!</h3>
+            <p>19 lessons completed. 20th lesson = your mastery test.</p>
+            <p style="margin-top:8px;"><span class="badge-gold">🔥 FROM ZERO TO HERO</span></p>
+        </div>
+
+        <div class="highlight-box">
+            <span class="emoji">🎯</span> <strong>Project 2 Goals:</strong><br />
+            🔸 <strong>Obfuscated Code</strong> - Work with methods named <code>a()</code>, <code>b()</code>, <code>c()</code>
+            <br />
+            🔸 <strong>Multiple Checks</strong> - Find and bypass at least 3 different protection layers
+            <br />
+            🔸 <strong>SharedPreferences</strong> - Modify stored data
+            <br />
+            🔸 <strong>Server-side Bypass</strong> - Learn when and how to bypass server checks
+            <br />
+            🔸 <strong>Clean Mod</strong> - No crashes, all features working
+        </div>
+
+        <p><strong>Step 1: Choose Your Target (Advanced)</strong></p>
+
+        <div class="highlight-box" style="border-color: rgba(255, 215, 0, 0.12);">
+            <span class="emoji">📱</span> <strong>Recommendations for Advanced Project:</strong><br />
+            🔸 A <strong>game</strong> with in-app purchases and VIP system
+            <br />
+            🔸 A <strong>productivity app</strong> with subscription model
+            <br />
+            🔸 A <strong>social media app</strong> with premium filters
+            <br /><br />
+            <strong>Challenge yourself!</strong> Choose something with:
+            <br />
+            ✓ Obfuscation (method names like <code>a()</code>, <code>b()</code>)
+            <br />
+            ✓ Multiple premium features
+            <br />
+            ✓ SharedPreferences usage
+        </div>
+
+        <p><strong>Step 2: Advanced Decompilation & Analysis</strong></p>
+
+        <div class="code-block">
+<span class="comment"># Use JADX with deobfuscation</span>
+<span class="label">jadx-gui</span> <span class="string">target_app.apk</span>
+
+<span class="comment"># Use APKTool for Smali access</span>
+<span class="label">apktool</span> d <span class="string">target_app.apk</span> <span class="opcode">-o</span> <span class="string">target_app_smali</span>
+
+<span class="comment"># Search for interesting patterns in Smali</span>
+<span class="label">grep</span> <span class="opcode">-r</span> <span class="string">"const/4.*0x1"</span> smali/  <span class="comment"># Look for true values</span>
+<span class="label">grep</span> <span class="opcode">-r</span> <span class="string">"if-eqz"</span> smali/         <span class="comment"># Look for conditional checks</span>
+<span class="label">grep</span> <span class="opcode">-r</span> <span class="string">"SharedPreferences"</span> smali/ <span class="comment"># Look for data storage</span>
+        </div>
+
+        <div class="highlight-box" style="border-color: rgba(0, 200, 255, 0.12);">
+            <span class="emoji">💡</span> <strong>Advanced Tip:</strong><br />
+            When methods are obfuscated (<code>a()</code>, <code>b()</code>, <code>c()</code>), look at:
+            <br />
+            🔹 <strong>What they return</strong> - boolean, int, object
+            <br />
+            🔹 <strong>What they access</strong> - fields, other methods
+            <br />
+            🔹 <strong>Strings inside</strong> - error messages, success messages
+            <br /><br />
+            The code itself tells you what it does, <strong>not the name</strong>!
+        </div>
+
+        <p><strong>Step 3: Finding Multiple Checks</strong></p>
+
+        <div class="code-block">
+<span class="comment"># Example: App with 3 protection layers</span>
+
+<span class="comment"># 1. Local license check</span>
+<span class="keyword">.method</span> <span class="keyword">public</span> <span class="method">a</span>()<span class="class">Z</span>  <span class="comment"># Obfuscated: isLicensed()</span>
+    <span class="opcode">invoke-virtual</span> {<span class="register">p0</span>}, <span class="class">Lcom/example/License;</span><span class="opcode">-</span><span class="method">b</span>()<span class="class">Z</span>
+    <span class="opcode">move-result</span> <span class="register">v0</span>
+    <span class="opcode">return</span> <span class="register">v0</span>
+<span class="keyword">.end method</span>
+
+<span class="comment"># 2. Subscription check</span>
+<span class="keyword">.method</span> <span class="keyword">public</span> <span class="method">b</span>()<span class="class">Z</span>  <span class="comment"># Obfuscated: isSubscribed()</span>
+    <span class="opcode">iget</span> <span class="register">v0</span>, <span class="register">p0</span>, <span class="class">Lcom/example/User;</span><span class="opcode">-</span><span class="register">c</span>:<span class="class">Z</span>  <span class="comment"># Field: is_subscribed</span>
+    <span class="opcode">return</span> <span class="register">v0</span>
+<span class="keyword">.end method</span>
+
+<span class="comment"># 3. Root detection check</span>
+<span class="keyword">.method</span> <span class="keyword">public</span> <span class="method">c</span>()<span class="class">Z</span>  <span class="comment"># Obfuscated: isRooted()</span>
+    <span class="opcode">invoke-static</span> <span class="opcode">{}</span>, <span class="class">Lcom/example/RootCheck;</span><span class="opcode">-</span><span class="method">d</span>()<span class="class">Z</span>
+    <span class="opcode">move-result</span> <span class="register">v0</span>
+    <span class="opcode">if-eqz</span> <span class="register">v0</span>, <span class="label">:not_rooted</span>
+    <span class="opcode">const/4</span> <span class="register">v1</span>, <span class="number">0x1</span>
+    <span class="opcode">return</span> <span class="register">v1</span>
+    <span class="label">:not_rooted</span>
+    <span class="opcode">const/4</span> <span class="register">v1</span>, <span class="number">0x0</span>
+    <span class="opcode">return</span> <span class="register">v1</span>
+<span class="keyword">.end method</span>
+        </div>
+
+        <div class="highlight-box" style="border-color: rgba(255, 215, 0, 0.12);">
+            <span class="emoji">⚡</span> <strong>Bypass Strategy:</strong><br />
+            <strong>1.</strong> <code>a()</code> - Force return <code>0x1</code>
+            <br />
+            <strong>2.</strong> <code>b()</code> - Find field <code>c</code> and set to <code>0x1</code> in constructor
+            <br />
+            <strong>3.</strong> <code>c()</code> - Change <code>if-eqz</code> to <code>if-nez</code>
+            <br /><br />
+            <strong>Apply ALL three patches</strong> for complete success!
+        </div>
+
+        <p><strong>Step 4: Handle SharedPreferences & Server Checks</strong></p>
+
+        <div class="code-block">
+<span class="comment"># Sometimes apps save premium status</span>
+<span class="comment"># Find the SharedPreferences code and modify it</span>
+
+<span class="comment"># Example: Reading premium status</span>
+<span class="opcode">const-string</span> <span class="register">v0</span>, <span class="string">"premium"</span>
+<span class="opcode">invoke-interface</span> {<span class="register">v1</span>, <span class="register">v0</span>}, <span class="class">Landroid/content/SharedPreferences;</span><span class="opcode">-</span><span class="method">getBoolean</span>(<span class="class">Ljava/lang/String;</span><span class="opcode">,</span> <span class="class">Z</span>)<span class="class">Z</span>
+<span class="opcode">move-result</span> <span class="register">v0</span>
+
+<span class="comment"># Force it to always return true</span>
+<span class="opcode">const/4</span> <span class="register">v0</span>, <span class="number">0x1</span>
+        </div>
+
+        <div class="highlight-box" style="border-color: rgba(0, 200, 255, 0.12);">
+            <span class="emoji">🌐</span> <strong>Server-Side Validation:</strong><br />
+            Some apps verify premium status on their server.
+            <br /><br />
+            <strong>How to identify it:</strong>
+            <br />
+            🔹 Look for network calls (<code>HttpURLConnection</code>, <code>OkHttp</code>)
+            <br />
+            🔹 Look for JSON responses with status fields
+            <br />
+            🔹 Look for methods with <code>checkServer</code> or <code>verifyOnline</code>
+            <br /><br />
+            <strong>Bypass method:</strong>
+            <br />
+            🔹 Modify the response parsing to always show <code>"success"</code>
+            <br />
+            🔹 Or force the check to use a <strong>cached local value</strong>
+        </div>
+
+        <p><strong>Step 5: Testing and Finalizing</strong></p>
+
+        <div class="highlight-box" style="border-color: rgba(255, 215, 0, 0.12);">
+            <span class="emoji">✅</span> <strong>Final Testing Checklist:</strong><br />
+            🔸 <strong>All features</strong> unlocked and working
+            <br />
+            🔸 <strong>No crashes</strong> during normal usage
+            <br />
+            🔸 <strong>Ads removed</strong> (if applicable)
+            <br />
+            🔸 <strong>SharedPreferences</strong> shows premium status
+            <br />
+            🔸 <strong>App updates</strong> don't break the mod (optional)
+            <br /><br />
+            <strong>If something doesn't work:</strong>
+            <br />
+            🔹 Check logs (<code>logcat</code>) for error messages
+            <br />
+            🔹 Search for the error message in Smali
+            <br />
+            🔹 Find what check leads to that error
+            <br />
+            🔹 Apply another patch
+        </div>
+
+        <div class="celebration">
+            <h3>🎉 YOU ARE NOW A MODDER! 🎉</h3>
+            <p>From knowing nothing about Smali to modding complex apps.</p>
+            <p style="margin-top:8px;"><strong>This is just the beginning of your journey!</strong></p>
+            <p style="margin-top:12px; font-size:0.9rem; color:#88aaff;">
+                😈 Keep learning, keep modding, and never stop exploring!
+            </p>
+        </div>
+    </div>
+
+    <!-- FINAL WORDS -->
+    <div class="lesson-card" style="border-left-color: #ff6b00;">
+        <div class="lesson-number">💎 THE END</div>
+        <h2 style="background: linear-gradient(135deg, #ffd700, #ff6b00); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">What's Next?</h2>
+        <p>
+            <strong>Congratulations, modder!</strong> You've completed all 20 lessons of Smali Town.
+            <br /><br />
+            Here's what you can do now:
+        </p>
+        <div class="highlight-box" style="border-color: rgba(255, 215, 0, 0.12);">
+            🔹 <strong>Share your knowledge</strong> - Help others learn too
+            <br />
+            🔹 <strong>Mod more apps</strong> - Practice makes perfect
+            <br />
+            🔹 <strong>Join the community</strong> - Connect with other modders
+            <br />
+            🔹 <strong>Create your own mods</strong> - Add custom features
+            <br />
+            🔹 <strong>Stay updated</strong> - Android evolves, so should you
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <div class="footer">
+        <span class="sn">🔥 SN Mods</span>
+        <span style="color:#4a5a6a;"> • </span>
+        <span class="heart">❤️</span>
+        <span style="color:#4a5a6a;"> • </span>
+        <span class="tag">@Cyber_Ninja513</span>
+        <br />
+        <span style="color:#ffd700; font-size:0.8rem;">🏆 Smali Town • Complete! 🏆</span>
+        <br />
+        <span style="color:#4a5a6a; font-size:0.7rem;">20 lessons • From Zero to Hero</span>
+    </div>
+
+</div>
+<script>
+    document.addEventListener('gesturestart', function(e){e.preventDefault();});
+    document.addEventListener('keydown', function(e){
+        if(e.ctrlKey && (e.key==='+'||e.key==='-'||e.key==='0')) e.preventDefault();
+    });
+    document.addEventListener('wheel', function(e){
+        if(e.ctrlKey) e.preventDefault();
+    }, {passive: false});
+    document.querySelector('.container').addEventListener('touchmove', function(e){
+        if(e.touches.length > 1) e.preventDefault();
+    }, {passive: false});
+    console.log('✅ SN Mods | Smali Town - FINAL LESSON loaded');
+    console.log('🎉 Congratulations! You completed all 20 lessons!');
+    console.log('😈 @Cyber_Ninja513');
+</script>
+</body>
+</html>

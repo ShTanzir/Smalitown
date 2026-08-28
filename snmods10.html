@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>SN Mods | Smali Lesson 10</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0f0f2a;
+            color: #e0e6f0;
+            padding: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            overflow-y: auto;
+            overflow-x: hidden;
+            background-image:
+                radial-gradient(ellipse at 10% 20%, rgba(0, 255, 100, 0.06) 0%, transparent 50%),
+                radial-gradient(ellipse at 90% 80%, rgba(0, 200, 255, 0.06) 0%, transparent 50%);
+        }
+        .container {
+            max-width: 860px;
+            width: 100%;
+            background: rgba(20, 20, 50, 0.92);
+            backdrop-filter: blur(16px);
+            border-radius: 40px;
+            padding: 28px 26px;
+            border: 1px solid rgba(0, 255, 100, 0.06);
+            box-shadow: 0 30px 80px rgba(0,0,0,0.9);
+            margin: 10px 0;
+            position: relative;
+            overflow: hidden;
+        }
+        .container::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle at 30% 40%, rgba(0,255,100,0.02), transparent 60%),
+                        radial-gradient(circle at 70% 60%, rgba(0,200,255,0.02), transparent 60%);
+            pointer-events: none;
+            animation: rotateBg 30s linear infinite;
+        }
+        @keyframes rotateBg {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 2px solid rgba(0, 255, 100, 0.08);
+            padding-bottom: 18px;
+            margin-bottom: 28px;
+            flex-wrap: wrap;
+            gap: 12px;
+            position: relative;
+            z-index: 1;
+        }
+        .header .brand .logo {
+            font-size: 1.2rem;
+            color: #00ff64;
+            font-weight: 700;
+            background: rgba(0,255,100,0.06);
+            padding: 4px 14px;
+            border-radius: 50px;
+            border: 1px solid rgba(0,255,100,0.08);
+        }
+        .header h1 {
+            font-size: 1.8rem;
+            background: linear-gradient(135deg, #00ff64, #00a3ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 900;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .header h1 .icon { font-size: 2rem; animation: pulse 2s infinite; }
+        @keyframes pulse { 0%,100%{transform:scale(1);} 50%{transform:scale(1.1) rotate(5deg);} }
+        .header .badge {
+            background: rgba(0,255,100,0.1);
+            padding: 6px 20px;
+            border-radius: 50px;
+            font-size: 0.8rem;
+            color: #00ff64;
+            border: 1px solid rgba(0,255,100,0.15);
+            font-weight: 600;
+        }
+        .lesson-card {
+            background: rgba(0,0,0,0.3);
+            border-radius: 24px;
+            padding: 24px 28px;
+            margin-bottom: 24px;
+            border-left: 5px solid #00ff64;
+            box-shadow: 0 8px 40px rgba(0,0,0,0.3);
+            position: relative;
+            z-index: 1;
+            transition: 0.3s;
+        }
+        .lesson-card:hover { transform: translateX(4px); border-left-color: #00a3ff; }
+        .lesson-card .lesson-number {
+            font-size: 0.75rem;
+            color: #00ff64;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            font-weight: 700;
+            background: rgba(0,255,100,0.05);
+            display: inline-block;
+            padding: 4px 16px;
+            border-radius: 50px;
+            border: 1px solid rgba(0,255,100,0.06);
+            margin-bottom: 10px;
+        }
+        .lesson-card h2 {
+            font-size: 1.8rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #fff, #00ff64);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin: 6px 0 14px 0;
+        }
+        .lesson-card p { line-height: 2; color: #c8d4e8; font-size: 1.02rem; }
+        .lesson-card p strong { color: #00ff64; }
+        .highlight-box {
+            background: rgba(0,255,100,0.05);
+            border-radius: 16px;
+            padding: 16px 22px;
+            margin: 18px 0;
+            border: 1px solid rgba(0,255,100,0.06);
+            transition: 0.3s;
+        }
+        .highlight-box:hover { border-color: rgba(0,255,100,0.15); }
+        .highlight-box .emoji { font-size: 1.4rem; margin-right: 8px; }
+        .highlight-box strong { color: #00ff64; }
+        .highlight-box code {
+            color: #00ff64;
+            font-family: 'Fira Code', monospace;
+            background: rgba(0,0,0,0.4);
+            padding: 2px 12px;
+            border-radius: 6px;
+            font-size: 0.9rem;
+        }
+        .code-block {
+            background: #070b16;
+            border-radius: 18px;
+            padding: 20px 24px;
+            overflow-x: auto;
+            border: 1px solid rgba(0,255,100,0.04);
+            font-family: 'Fira Code', monospace;
+            font-size: 0.92rem;
+            direction: ltr;
+            text-align: left;
+            white-space: pre-wrap;
+            color: #d4e0ff;
+            margin: 16px 0;
+            box-shadow: inset 0 4px 30px rgba(0,0,0,0.6);
+            transition: 0.3s;
+        }
+        .code-block:hover { border-color: rgba(0,255,100,0.1); }
+        .code-block .comment { color: #4a7a8a; font-style: italic; }
+        .code-block .keyword { color: #ff79c6; font-weight: 700; }
+        .code-block .string { color: #f1fa8c; }
+        .code-block .number { color: #bd93f9; font-weight: 600; }
+        .code-block .class { color: #8be9fd; font-weight: 600; }
+        .code-block .method { color: #50fa7b; font-weight: 600; }
+        .code-block .opcode { color: #50fa7b; font-weight: 700; }
+        .code-block .register { color: #ffb86c; font-weight: 600; }
+        .code-block .label { color: #ffd700; font-weight: 600; }
+        .table-wrap {
+            overflow-x: auto;
+            margin: 18px 0;
+            border-radius: 18px;
+            border: 1px solid rgba(255,255,255,0.03);
+            box-shadow: 0 4px 30px rgba(0,0,0,0.2);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: rgba(0,0,0,0.25);
+            font-size: 0.95rem;
+        }
+        th {
+            background: rgba(0,255,100,0.06);
+            color: #00ff64;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            font-size: 0.75rem;
+            padding: 14px 18px;
+            border-bottom: 2px solid rgba(0,255,100,0.04);
+        }
+        td {
+            padding: 13px 18px;
+            border-bottom: 1px solid rgba(255,255,255,0.02);
+            color: #c8d4e8;
+        }
+        tr:hover td { background: rgba(0,255,100,0.02); }
+        td code {
+            color: #8be9fd;
+            font-family: 'Fira Code', monospace;
+            background: rgba(0,0,0,0.3);
+            padding: 2px 10px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 28px;
+            color: #4a5a6a;
+            font-size: 0.8rem;
+            border-top: 1px solid rgba(255,255,255,0.02);
+            padding-top: 20px;
+            position: relative;
+            z-index: 1;
+        }
+        .footer .sn {
+            background: linear-gradient(135deg, #00ff64, #00a3ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 700;
+            font-size: 1rem;
+        }
+        .footer .heart { color: #ff2d75; animation: pulse 1.5s infinite; display: inline-block; }
+        .footer .tag { color: #88aaff; font-weight: 600; }
+        @media (max-width: 600px) {
+            .container { padding: 16px 14px; }
+            .header h1 { font-size: 1.4rem; }
+            .lesson-card h2 { font-size: 1.3rem; }
+            .lesson-card { padding: 18px 16px; }
+            .code-block { font-size: 0.75rem; padding: 14px 16px; }
+            .highlight-box { padding: 14px 16px; }
+            th, td { padding: 10px 12px; font-size: 0.85rem; }
+            .header .brand .logo { font-size: 0.9rem; }
+        }
+        ::-webkit-scrollbar { width: 5px; height: 5px; }
+        ::-webkit-scrollbar-track { background: rgba(255,255,255,0.02); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb { background: linear-gradient(180deg, #00ff64, #00a3ff); border-radius: 10px; }
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <!-- HEADER -->
+    <div class="header">
+        <div class="brand"><span class="logo">🔥 SN Mods</span></div>
+        <h1><span class="icon">🏘️</span> Smali Town</h1>
+        <span class="badge">📘 Lesson 10 / 20</span>
+    </div>
+
+    <!-- LESSON 10 -->
+    <div class="lesson-card">
+        <div class="lesson-number">📖 Lesson 10</div>
+        <h2>Classes & Interfaces</h2>
+
+        <p>
+            In Smali, <strong>classes</strong> define objects and their behavior, while <strong>interfaces</strong> define contracts that classes can implement.
+            Understanding these is essential for working with complex apps.
+        </p>
+
+        <div class="highlight-box">
+            <span class="emoji">🏗️</span> <strong>Why classes and interfaces matter for modding:</strong><br />
+            Classes contain <strong>methods and fields</strong> that control app behavior. Interfaces are often used for <strong>callbacks, listeners, and events</strong>.
+            By modifying these, you can <strong>change how the app works</strong> at a fundamental level!
+        </div>
+
+        <p><strong>Class Definition in Smali:</strong></p>
+
+        <div class="code-block">
+<span class="comment"># A simple class definition</span>
+<span class="keyword">.class</span> <span class="class">public</span> <span class="class">Lcom/example/User;</span>
+<span class="keyword">.super</span> <span class="class">Ljava/lang/Object;</span>
+<span class="keyword">.source</span> <span class="string">"User.java"</span>
+
+<span class="comment"># Fields</span>
+<span class="keyword">.field</span> <span class="keyword">private</span> <span class="register">name</span>:<span class="class">Ljava/lang/String;</span>
+<span class="keyword">.field</span> <span class="keyword">private</span> <span class="register">level</span>:<span class="class">I</span>
+<span class="keyword">.field</span> <span class="keyword">private</span> <span class="register">is_vip</span>:<span class="class">Z</span>
+
+<span class="comment"># Constructor</span>
+<span class="keyword">.method</span> <span class="keyword">public</span> <span class="method">constructor</span>&lt;init&gt;()<span class="class">V</span>
+    <span class="opcode">.locals</span> <span class="number">1</span>
+    <span class="opcode">.prologue</span>
+    <span class="opcode">invoke-direct</span> {<span class="register">p0</span>}, <span class="class">Ljava/lang/Object;</span><span class="opcode">-</span><span class="method">&lt;init&gt;</span>()<span class="class">V</span>
+    <span class="opcode">return-void</span>
+<span class="keyword">.end method</span>
+        </div>
+
+        <div class="highlight-box" style="border-color: rgba(255, 215, 0, 0.12);">
+            <span class="emoji">🔥</span> <strong>Modding Example: Creating Objects</strong><br />
+            To create a new object in Smali, use <code>new-instance</code>:
+            <br />
+            <code>new-instance v0, Lcom/example/User;</code>
+            <br />
+            <code>invoke-direct {v0}, Lcom/example/User;-&gt;&lt;init&gt;()V</code>
+            <br /><br />
+            This creates a new <strong>User</strong> object in register <code>v0</code>!
+        </div>
+
+        <p><strong>Class-Related OpCodes:</strong></p>
+
+        <div class="table-wrap">
+            <table>
+                <thead><tr><th>OpCode</th><th>Purpose</th><th>Example</th></tr></thead>
+                <tbody>
+                    <tr><td><code>.class</code></td><td>Define a class</td><td><code>.class public Lcom/example/User;</code></td></tr>
+                    <tr><td><code>.super</code></td><td>Define parent class</td><td><code>.super Ljava/lang/Object;</code></td></tr>
+                    <tr><td><code>new-instance</code></td><td>Create a new object</td><td><code>new-instance v0, Lcom/example/User;</code></td></tr>
+                    <tr><td><code>instanceof</code></td><td>Check object type</td><td><code>instanceof v0, Lcom/example/User;</code></td></tr>
+                    <tr><td><code>check-cast</code></td><td>Cast to a type</td><td><code>check-cast v0, Lcom/example/User;</code></td></tr>
+                    <tr><td><code>.implements</code></td><td>Implement an interface</td><td><code>.implements Lcom/example/Listener;</code></td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="highlight-box" style="border-color: rgba(0, 200, 255, 0.12);">
+            <span class="emoji">💡</span> <strong>Pro Tip:</strong><br />
+            When searching for premium features, look for classes like <code>PremiumManager</code>, <code>VipChecker</code>, or <code>SubscriptionHandler</code>.
+            These often contain the <strong>key logic</strong> for unlocking content!
+        </div>
+
+        <p><strong>Example: Checking Object Type</strong></p>
+
+        <div class="code-block">
+<span class="comment"># Check if v0 is a User object</span>
+<span class="opcode">instanceof</span> <span class="register">v0</span>, <span class="class">Lcom/example/User;</span>
+<span class="opcode">move-result</span> <span class="register">v1</span>
+
+<span class="comment"># If v1 == 0, it's not a User</span>
+<span class="opcode">if-eqz</span> <span class="register">v1</span>, <span class="label">:not_user</span>
+
+<span class="comment"># It IS a User! Cast safely</span>
+<span class="opcode">check-cast</span> <span class="register">v0</span>, <span class="class">Lcom/example/User;</span>
+        </div>
+
+        <div class="highlight-box" style="border-color: rgba(255, 215, 0, 0.12);">
+            <span class="emoji">⚡</span> <strong>Common Mod: Injecting Custom Code</strong><br />
+            You can <strong>add your own methods</strong> to existing classes in Smali.
+            <br />
+            Simply add a new <code>.method</code> block to a class and call it from elsewhere!
+            <br /><br />
+            This is how advanced modders <strong>inject custom features</strong> into apps.
+        </div>
+    </div>
+
+    <!-- PREVIEW LESSON 11 -->
+    <div class="lesson-card" style="border-left-color: #00a3ff;">
+        <div class="lesson-number" style="color:#00a3ff;">🔮 Lesson 11 (Preview)</div>
+        <h2 style="background: linear-gradient(135deg, #b0d0ff, #00a3ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Constructors</h2>
+        <p>
+            In Lesson 11, we'll learn about <strong style="color:#00a3ff;">constructors</strong> in Smali.
+            Constructors are special methods that initialize objects when they're created.
+        </p>
+        <div class="highlight-box" style="border-color: rgba(0, 163, 255, 0.12);">
+            <span class="emoji">📌</span> <strong>Key OpCodes:</strong><br />
+            <code>&lt;init&gt;()V</code> → Constructor method name<br />
+            <code>invoke-direct</code> → Call parent constructor
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <div class="footer">
+        <span class="sn">🔥 SN Mods</span> <span style="color:#4a5a6a;"> • </span>
+        <span class="heart">❤️</span> <span style="color:#4a5a6a;"> • </span>
+        <span class="tag">@Cyber_Ninja513</span><br />
+        <span style="color:#4a5a6a; font-size:0.7rem;">Smali Town • Lesson 10 of 20</span>
+    </div>
+
+</div>
+<script>
+    document.addEventListener('gesturestart', function(e){e.preventDefault();});
+    document.addEventListener('keydown', function(e){
+        if(e.ctrlKey && (e.key==='+'||e.key==='-'||e.key==='0')) e.preventDefault();
+    });
+    document.addEventListener('wheel', function(e){
+        if(e.ctrlKey) e.preventDefault();
+    }, {passive: false});
+    document.querySelector('.container').addEventListener('touchmove', function(e){
+        if(e.touches.length > 1) e.preventDefault();
+    }, {passive: false});
+    console.log('✅ SN Mods | Smali Town - Lesson 10 loaded');
+    console.log('😈 @Cyber_Ninja513');
+</script>
+</body>
+</html>

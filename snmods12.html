@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>SN Mods | Smali Lesson 12</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0f0f2a;
+            color: #e0e6f0;
+            padding: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            overflow-y: auto;
+            overflow-x: hidden;
+            background-image:
+                radial-gradient(ellipse at 10% 20%, rgba(100, 200, 255, 0.06) 0%, transparent 50%),
+                radial-gradient(ellipse at 90% 80%, rgba(200, 100, 255, 0.06) 0%, transparent 50%);
+        }
+        .container {
+            max-width: 860px;
+            width: 100%;
+            background: rgba(20, 20, 50, 0.92);
+            backdrop-filter: blur(16px);
+            border-radius: 40px;
+            padding: 28px 26px;
+            border: 1px solid rgba(100, 200, 255, 0.06);
+            box-shadow: 0 30px 80px rgba(0,0,0,0.9);
+            margin: 10px 0;
+            position: relative;
+            overflow: hidden;
+        }
+        .container::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle at 30% 40%, rgba(100,200,255,0.02), transparent 60%),
+                        radial-gradient(circle at 70% 60%, rgba(200,100,255,0.02), transparent 60%);
+            pointer-events: none;
+            animation: rotateBg 30s linear infinite;
+        }
+        @keyframes rotateBg {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 2px solid rgba(100, 200, 255, 0.08);
+            padding-bottom: 18px;
+            margin-bottom: 28px;
+            flex-wrap: wrap;
+            gap: 12px;
+            position: relative;
+            z-index: 1;
+        }
+        .header .brand .logo {
+            font-size: 1.2rem;
+            color: #64c8ff;
+            font-weight: 700;
+            background: rgba(100,200,255,0.06);
+            padding: 4px 14px;
+            border-radius: 50px;
+            border: 1px solid rgba(100,200,255,0.08);
+        }
+        .header h1 {
+            font-size: 1.8rem;
+            background: linear-gradient(135deg, #64c8ff, #c864ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 900;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .header h1 .icon { font-size: 2rem; animation: pulse 2s infinite; }
+        @keyframes pulse { 0%,100%{transform:scale(1);} 50%{transform:scale(1.1) rotate(5deg);} }
+        .header .badge {
+            background: rgba(100,200,255,0.1);
+            padding: 6px 20px;
+            border-radius: 50px;
+            font-size: 0.8rem;
+            color: #64c8ff;
+            border: 1px solid rgba(100,200,255,0.15);
+            font-weight: 600;
+        }
+        .lesson-card {
+            background: rgba(0,0,0,0.3);
+            border-radius: 24px;
+            padding: 24px 28px;
+            margin-bottom: 24px;
+            border-left: 5px solid #64c8ff;
+            box-shadow: 0 8px 40px rgba(0,0,0,0.3);
+            position: relative;
+            z-index: 1;
+            transition: 0.3s;
+        }
+        .lesson-card:hover { transform: translateX(4px); border-left-color: #c864ff; }
+        .lesson-card .lesson-number {
+            font-size: 0.75rem;
+            color: #64c8ff;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            font-weight: 700;
+            background: rgba(100,200,255,0.05);
+            display: inline-block;
+            padding: 4px 16px;
+            border-radius: 50px;
+            border: 1px solid rgba(100,200,255,0.06);
+            margin-bottom: 10px;
+        }
+        .lesson-card h2 {
+            font-size: 1.8rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #fff, #64c8ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin: 6px 0 14px 0;
+        }
+        .lesson-card p { line-height: 2; color: #c8d4e8; font-size: 1.02rem; }
+        .lesson-card p strong { color: #64c8ff; }
+        .highlight-box {
+            background: rgba(100,200,255,0.05);
+            border-radius: 16px;
+            padding: 16px 22px;
+            margin: 18px 0;
+            border: 1px solid rgba(100,200,255,0.06);
+            transition: 0.3s;
+        }
+        .highlight-box:hover { border-color: rgba(100,200,255,0.15); }
+        .highlight-box .emoji { font-size: 1.4rem; margin-right: 8px; }
+        .highlight-box strong { color: #64c8ff; }
+        .highlight-box code {
+            color: #64c8ff;
+            font-family: 'Fira Code', monospace;
+            background: rgba(0,0,0,0.4);
+            padding: 2px 12px;
+            border-radius: 6px;
+            font-size: 0.9rem;
+        }
+        .code-block {
+            background: #070b16;
+            border-radius: 18px;
+            padding: 20px 24px;
+            overflow-x: auto;
+            border: 1px solid rgba(100,200,255,0.04);
+            font-family: 'Fira Code', monospace;
+            font-size: 0.92rem;
+            direction: ltr;
+            text-align: left;
+            white-space: pre-wrap;
+            color: #d4e0ff;
+            margin: 16px 0;
+            box-shadow: inset 0 4px 30px rgba(0,0,0,0.6);
+            transition: 0.3s;
+        }
+        .code-block:hover { border-color: rgba(100,200,255,0.1); }
+        .code-block .comment { color: #4a7a8a; font-style: italic; }
+        .code-block .keyword { color: #ff79c6; font-weight: 700; }
+        .code-block .string { color: #f1fa8c; }
+        .code-block .number { color: #bd93f9; font-weight: 600; }
+        .code-block .class { color: #8be9fd; font-weight: 600; }
+        .code-block .method { color: #50fa7b; font-weight: 600; }
+        .code-block .opcode { color: #50fa7b; font-weight: 700; }
+        .code-block .register { color: #ffb86c; font-weight: 600; }
+        .code-block .label { color: #ffd700; font-weight: 600; }
+        .table-wrap {
+            overflow-x: auto;
+            margin: 18px 0;
+            border-radius: 18px;
+            border: 1px solid rgba(255,255,255,0.03);
+            box-shadow: 0 4px 30px rgba(0,0,0,0.2);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: rgba(0,0,0,0.25);
+            font-size: 0.95rem;
+        }
+        th {
+            background: rgba(100,200,255,0.06);
+            color: #64c8ff;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            font-size: 0.75rem;
+            padding: 14px 18px;
+            border-bottom: 2px solid rgba(100,200,255,0.04);
+        }
+        td {
+            padding: 13px 18px;
+            border-bottom: 1px solid rgba(255,255,255,0.02);
+            color: #c8d4e8;
+        }
+        tr:hover td { background: rgba(100,200,255,0.02); }
+        td code {
+            color: #8be9fd;
+            font-family: 'Fira Code', monospace;
+            background: rgba(0,0,0,0.3);
+            padding: 2px 10px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 28px;
+            color: #4a5a6a;
+            font-size: 0.8rem;
+            border-top: 1px solid rgba(255,255,255,0.02);
+            padding-top: 20px;
+            position: relative;
+            z-index: 1;
+        }
+        .footer .sn {
+            background: linear-gradient(135deg, #64c8ff, #c864ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 700;
+            font-size: 1rem;
+        }
+        .footer .heart { color: #ff2d75; animation: pulse 1.5s infinite; display: inline-block; }
+        .footer .tag { color: #88aaff; font-weight: 600; }
+        @media (max-width: 600px) {
+            .container { padding: 16px 14px; }
+            .header h1 { font-size: 1.4rem; }
+            .lesson-card h2 { font-size: 1.3rem; }
+            .lesson-card { padding: 18px 16px; }
+            .code-block { font-size: 0.75rem; padding: 14px 16px; }
+            .highlight-box { padding: 14px 16px; }
+            th, td { padding: 10px 12px; font-size: 0.85rem; }
+            .header .brand .logo { font-size: 0.9rem; }
+        }
+        ::-webkit-scrollbar { width: 5px; height: 5px; }
+        ::-webkit-scrollbar-track { background: rgba(255,255,255,0.02); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb { background: linear-gradient(180deg, #64c8ff, #c864ff); border-radius: 10px; }
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <!-- HEADER -->
+    <div class="header">
+        <div class="brand"><span class="logo">🔥 SN Mods</span></div>
+        <h1><span class="icon">🏘️</span> Smali Town</h1>
+        <span class="badge">📘 Lesson 12 / 20</span>
+    </div>
+
+    <!-- LESSON 12 -->
+    <div class="lesson-card">
+        <div class="lesson-number">📖 Lesson 12</div>
+        <h2>Static vs Non-Static Methods</h2>
+
+        <p>
+            In Smali, methods come in two flavors: <strong>static</strong> and <strong>non-static</strong>.
+            Understanding the difference is crucial for calling methods correctly.
+        </p>
+
+        <div class="highlight-box">
+            <span class="emoji">⚡</span> <strong>What's the Difference?</strong><br />
+            🔹 <strong>Static methods</strong>: Belong to the <strong>class</strong>, not to an object. Called with <code>invoke-static</code>.<br />
+            🔹 <strong>Non-static methods</strong>: Belong to an <strong>object</strong>. Called with <code>invoke-virtual</code>, <code>invoke-direct</code>, etc.<br />
+            <br />
+            💡 <strong>Key Rule:</strong> In non-static methods, <code>p0</code> is always <strong>this</strong> (the object itself)!
+        </div>
+
+        <p><strong>1. Non-Static (Instance) Methods:</strong></p>
+
+        <div class="code-block">
+<span class="comment"># Non-static method: belongs to an object</span>
+<span class="keyword">.method</span> <span class="keyword">public</span> <span class="method">getLevel</span>()<span class="class">I</span>
+    <span class="opcode">.locals</span> <span class="number">1</span>
+    <span class="opcode">.prologue</span>
+
+    <span class="comment"># p0 is "this" (the object itself)</span>
+    <span class="opcode">iget</span> <span class="register">v0</span>, <span class="register">p0</span>, <span class="class">Lcom/example/User;</span><span class="opcode">-</span><span class="register">level</span>:<span class="class">I</span>
+    <span class="opcode">return</span> <span class="register">v0</span>
+<span class="keyword">.end method</span>
+
+<span class="comment"># Calling a non-static method</span>
+<span class="opcode">invoke-virtual</span> {<span class="register">v0</span>}, <span class="class">Lcom/example/User;</span><span class="opcode">-</span><span class="method">getLevel</span>()<span class="class">I</span>
+<span class="opcode">move-result</span> <span class="register">v1</span>
+        </div>
+
+        <div class="highlight-box" style="border-color: rgba(255, 215, 0, 0.12);">
+            <span class="emoji">🔥</span> <strong>Important:</strong><br />
+            In non-static methods, <code>p0</code> is the <strong>object reference</strong> (this).
+            <br />
+            This means you <strong>always</strong> need an object to call a non-static method!
+        </div>
+
+        <p><strong>2. Static Methods:</strong></p>
+
+        <div class="code-block">
+<span class="comment"># Static method: belongs to the class</span>
+<span class="keyword">.method</span> <span class="keyword">public</span> <span class="keyword">static</span> <span class="method">getMaxLevel</span>()<span class="class">I</span>
+    <span class="opcode">.locals</span> <span class="number">1</span>
+    <span class="opcode">.prologue</span>
+
+    <span class="comment"># No p0! Static methods don't have "this"</span>
+    <span class="opcode">const/16</span> <span class="register">v0</span>, <span class="number">0x64</span>   <span class="comment"># 100</span>
+    <span class="opcode">return</span> <span class="register">v0</span>
+<span class="keyword">.end method</span>
+
+<span class="comment"># Calling a static method</span>
+<span class="opcode">invoke-static</span> <span class="opcode">{}</span>, <span class="class">Lcom/example/User;</span><span class="opcode">-</span><span class="method">getMaxLevel</span>()<span class="class">I</span>
+<span class="opcode">move-result</span> <span class="register">v0</span>
+        </div>
+
+        <div class="highlight-box" style="border-color: rgba(0, 200, 255, 0.12);">
+            <span class="emoji">💡</span> <strong>Pro Tip:</strong><br />
+            When modding, look for the <code>static</code> keyword in the method definition.
+            <br />
+            If you see <code>.method public static</code>, it's a static method!
+            <br />
+            If you see <code>.method public</code> (without static), it's non-static.
+        </div>
+
+        <p><strong>Comparison Table:</strong></p>
+
+        <div class="table-wrap">
+            <table>
+                <thead><tr><th>Feature</th><th>Static Method</th><th>Non-Static Method</th></tr></thead>
+                <tbody>
+                    <tr><td><strong>Keyword</strong></td><td><code>static</code> present</td><td>No <code>static</code></td></tr>
+                    <tr><td><strong>p0</strong></td><td>First parameter</td><td><strong>this</strong> (object)</td></tr>
+                    <tr><td><strong>Call with</strong></td><td><code>invoke-static</code></td><td><code>invoke-virtual</code> / <code>invoke-direct</code></td></tr>
+                    <tr><td><strong>Needs object</strong></td><td>No</td><td>Yes</td></tr>
+                    <tr><td><strong>Access fields</strong></td><td>Only static fields</td><td>Can access all fields</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="highlight-box" style="border-color: rgba(255, 215, 0, 0.12);">
+            <span class="emoji">⚡</span> <strong>Quick Mod Example:</strong><br />
+            If you find a static method called <code>isLicenseValid()Z</code>:
+            <br />
+            Change <code>const/4 v0, 0x0</code> to <code>const/4 v0, 0x1</code>
+            <br /><br />
+            This will make the license check <strong>always return TRUE</strong>! ✅
+        </div>
+    </div>
+
+    <!-- PREVIEW LESSON 13 -->
+    <div class="lesson-card" style="border-left-color: #c864ff;">
+        <div class="lesson-number" style="color:#c864ff;">🔮 Lesson 13 (Preview)</div>
+        <h2 style="background: linear-gradient(135deg, #d0b0ff, #c864ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Working with Strings</h2>
+        <p>
+            In Lesson 13, we'll learn how to <strong style="color:#c864ff;">work with strings</strong> in Smali.
+            Strings are everywhere in apps - from UI text to data processing.
+        </p>
+        <div class="highlight-box" style="border-color: rgba(200, 100, 255, 0.12);">
+            <span class="emoji">📌</span> <strong>Key OpCodes:</strong><br />
+            <code>const-string</code> → Load a string<br />
+            <code>invoke-virtual</code> → Call string methods (length, substring, etc.)
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <div class="footer">
+        <span class="sn">🔥 SN Mods</span> <span style="color:#4a5a6a;"> • </span>
+        <span class="heart">❤️</span> <span style="color:#4a5a6a;"> • </span>
+        <span class="tag">@Cyber_Ninja513</span><br />
+        <span style="color:#4a5a6a; font-size:0.7rem;">Smali Town • Lesson 12 of 20</span>
+    </div>
+
+</div>
+<script>
+    document.addEventListener('gesturestart', function(e){e.preventDefault();});
+    document.addEventListener('keydown', function(e){
+        if(e.ctrlKey && (e.key==='+'||e.key==='-'||e.key==='0')) e.preventDefault();
+    });
+    document.addEventListener('wheel', function(e){
+        if(e.ctrlKey) e.preventDefault();
+    }, {passive: false});
+    document.querySelector('.container').addEventListener('touchmove', function(e){
+        if(e.touches.length > 1) e.preventDefault();
+    }, {passive: false});
+    console.log('✅ SN Mods | Smali Town - Lesson 12 loaded');
+    console.log('😈 @Cyber_Ninja513');
+</script>
+</body>
+</html>

@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>SN Mods | Smali Lesson 16</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0f0f2a;
+            color: #e0e6f0;
+            padding: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            overflow-y: auto;
+            overflow-x: hidden;
+            background-image:
+                radial-gradient(ellipse at 10% 20%, rgba(100, 200, 255, 0.06) 0%, transparent 50%),
+                radial-gradient(ellipse at 90% 80%, rgba(200, 100, 255, 0.06) 0%, transparent 50%);
+        }
+        .container {
+            max-width: 860px;
+            width: 100%;
+            background: rgba(20, 20, 50, 0.92);
+            backdrop-filter: blur(16px);
+            border-radius: 40px;
+            padding: 28px 26px;
+            border: 1px solid rgba(100, 200, 255, 0.06);
+            box-shadow: 0 30px 80px rgba(0,0,0,0.9);
+            margin: 10px 0;
+            position: relative;
+            overflow: hidden;
+        }
+        .container::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle at 30% 40%, rgba(100,200,255,0.02), transparent 60%),
+                        radial-gradient(circle at 70% 60%, rgba(200,100,255,0.02), transparent 60%);
+            pointer-events: none;
+            animation: rotateBg 30s linear infinite;
+        }
+        @keyframes rotateBg {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 2px solid rgba(100, 200, 255, 0.08);
+            padding-bottom: 18px;
+            margin-bottom: 28px;
+            flex-wrap: wrap;
+            gap: 12px;
+            position: relative;
+            z-index: 1;
+        }
+        .header .brand .logo {
+            font-size: 1.2rem;
+            color: #64c8ff;
+            font-weight: 700;
+            background: rgba(100,200,255,0.06);
+            padding: 4px 14px;
+            border-radius: 50px;
+            border: 1px solid rgba(100,200,255,0.08);
+        }
+        .header h1 {
+            font-size: 1.8rem;
+            background: linear-gradient(135deg, #64c8ff, #c864ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 900;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .header h1 .icon { font-size: 2rem; animation: pulse 2s infinite; }
+        @keyframes pulse { 0%,100%{transform:scale(1);} 50%{transform:scale(1.1) rotate(5deg);} }
+        .header .badge {
+            background: rgba(100,200,255,0.1);
+            padding: 6px 20px;
+            border-radius: 50px;
+            font-size: 0.8rem;
+            color: #64c8ff;
+            border: 1px solid rgba(100,200,255,0.15);
+            font-weight: 600;
+        }
+        .lesson-card {
+            background: rgba(0,0,0,0.3);
+            border-radius: 24px;
+            padding: 24px 28px;
+            margin-bottom: 24px;
+            border-left: 5px solid #64c8ff;
+            box-shadow: 0 8px 40px rgba(0,0,0,0.3);
+            position: relative;
+            z-index: 1;
+            transition: 0.3s;
+        }
+        .lesson-card:hover { transform: translateX(4px); border-left-color: #c864ff; }
+        .lesson-card .lesson-number {
+            font-size: 0.75rem;
+            color: #64c8ff;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            font-weight: 700;
+            background: rgba(100,200,255,0.05);
+            display: inline-block;
+            padding: 4px 16px;
+            border-radius: 50px;
+            border: 1px solid rgba(100,200,255,0.06);
+            margin-bottom: 10px;
+        }
+        .lesson-card h2 {
+            font-size: 1.8rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #fff, #64c8ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin: 6px 0 14px 0;
+        }
+        .lesson-card p { line-height: 2; color: #c8d4e8; font-size: 1.02rem; }
+        .lesson-card p strong { color: #64c8ff; }
+        .highlight-box {
+            background: rgba(100,200,255,0.05);
+            border-radius: 16px;
+            padding: 16px 22px;
+            margin: 18px 0;
+            border: 1px solid rgba(100,200,255,0.06);
+            transition: 0.3s;
+        }
+        .highlight-box:hover { border-color: rgba(100,200,255,0.15); }
+        .highlight-box .emoji { font-size: 1.4rem; margin-right: 8px; }
+        .highlight-box strong { color: #64c8ff; }
+        .highlight-box code {
+            color: #64c8ff;
+            font-family: 'Fira Code', monospace;
+            background: rgba(0,0,0,0.4);
+            padding: 2px 12px;
+            border-radius: 6px;
+            font-size: 0.9rem;
+        }
+        .code-block {
+            background: #070b16;
+            border-radius: 18px;
+            padding: 20px 24px;
+            overflow-x: auto;
+            border: 1px solid rgba(100,200,255,0.04);
+            font-family: 'Fira Code', monospace;
+            font-size: 0.92rem;
+            direction: ltr;
+            text-align: left;
+            white-space: pre-wrap;
+            color: #d4e0ff;
+            margin: 16px 0;
+            box-shadow: inset 0 4px 30px rgba(0,0,0,0.6);
+            transition: 0.3s;
+        }
+        .code-block:hover { border-color: rgba(100,200,255,0.1); }
+        .code-block .comment { color: #4a7a8a; font-style: italic; }
+        .code-block .keyword { color: #ff79c6; font-weight: 700; }
+        .code-block .string { color: #f1fa8c; }
+        .code-block .number { color: #bd93f9; font-weight: 600; }
+        .code-block .class { color: #8be9fd; font-weight: 600; }
+        .code-block .method { color: #50fa7b; font-weight: 600; }
+        .code-block .opcode { color: #50fa7b; font-weight: 700; }
+        .code-block .register { color: #ffb86c; font-weight: 600; }
+        .code-block .label { color: #ffd700; font-weight: 600; }
+        .table-wrap {
+            overflow-x: auto;
+            margin: 18px 0;
+            border-radius: 18px;
+            border: 1px solid rgba(255,255,255,0.03);
+            box-shadow: 0 4px 30px rgba(0,0,0,0.2);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: rgba(0,0,0,0.25);
+            font-size: 0.95rem;
+        }
+        th {
+            background: rgba(100,200,255,0.06);
+            color: #64c8ff;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            font-size: 0.75rem;
+            padding: 14px 18px;
+            border-bottom: 2px solid rgba(100,200,255,0.04);
+        }
+        td {
+            padding: 13px 18px;
+            border-bottom: 1px solid rgba(255,255,255,0.02);
+            color: #c8d4e8;
+        }
+        tr:hover td { background: rgba(100,200,255,0.02); }
+        td code {
+            color: #8be9fd;
+            font-family: 'Fira Code', monospace;
+            background: rgba(0,0,0,0.3);
+            padding: 2px 10px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 28px;
+            color: #4a5a6a;
+            font-size: 0.8rem;
+            border-top: 1px solid rgba(255,255,255,0.02);
+            padding-top: 20px;
+            position: relative;
+            z-index: 1;
+        }
+        .footer .sn {
+            background: linear-gradient(135deg, #64c8ff, #c864ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 700;
+            font-size: 1rem;
+        }
+        .footer .heart { color: #ff2d75; animation: pulse 1.5s infinite; display: inline-block; }
+        .footer .tag { color: #88aaff; font-weight: 600; }
+        @media (max-width: 600px) {
+            .container { padding: 16px 14px; }
+            .header h1 { font-size: 1.4rem; }
+            .lesson-card h2 { font-size: 1.3rem; }
+            .lesson-card { padding: 18px 16px; }
+            .code-block { font-size: 0.75rem; padding: 14px 16px; }
+            .highlight-box { padding: 14px 16px; }
+            th, td { padding: 10px 12px; font-size: 0.85rem; }
+            .header .brand .logo { font-size: 0.9rem; }
+        }
+        ::-webkit-scrollbar { width: 5px; height: 5px; }
+        ::-webkit-scrollbar-track { background: rgba(255,255,255,0.02); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb { background: linear-gradient(180deg, #64c8ff, #c864ff); border-radius: 10px; }
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <!-- HEADER -->
+    <div class="header">
+        <div class="brand"><span class="logo">🔥 SN Mods</span></div>
+        <h1><span class="icon">🏘️</span> Smali Town</h1>
+        <span class="badge">📘 Lesson 16 / 20</span>
+    </div>
+
+    <!-- LESSON 16 -->
+    <div class="lesson-card">
+        <div class="lesson-number">📖 Lesson 16</div>
+        <h2>SharedPreferences</h2>
+
+        <p>
+            <strong>SharedPreferences</strong> is how Android apps store <strong>persistent data</strong> - like settings, scores, coins, and user data.
+            It's like a <strong>small database</strong> that survives even after the app closes.
+        </p>
+
+        <div class="highlight-box">
+            <span class="emoji">💾</span> <strong>Why SharedPreferences matters for modding:</strong><br />
+            Many apps store <strong>VIP status, coins, levels, unlocked items, and settings</strong> in SharedPreferences.
+            If you can <strong>modify</strong> the data stored here, you can <strong>unlock anything</strong> without modifying the code!
+        </div>
+
+        <p><strong>SharedPreferences in Smali:</strong></p>
+
+        <div class="table-wrap">
+            <table>
+                <thead><tr><th>Operation</th><th>Method</th><th>Example</th></tr></thead>
+                <tbody>
+                    <tr><td>Get preferences</td><td><code>getSharedPreferences()</code></td><td><code>invoke-virtual</code></td></tr>
+                    <tr><td>Edit preferences</td><td><code>edit()</code></td><td><code>invoke-interface</code></td></tr>
+                    <tr><td>Read int</td><td><code>getInt()</code></td><td><code>invoke-interface</code></td></tr>
+                    <tr><td>Write int</td><td><code>putInt()</code></td><td><code>invoke-interface</code></td></tr>
+                    <tr><td>Apply changes</td><td><code>apply()</code></td><td><code>invoke-interface</code></td></tr>
+                    <tr><td>Commit changes</td><td><code>commit()</code></td><td><code>invoke-interface</code></td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="highlight-box" style="border-color: rgba(255, 215, 0, 0.12);">
+            <span class="emoji">🔥</span> <strong>Modding Example: Unlimited Coins via Preferences</strong><br />
+            Find where the app saves your coins.
+            <br /><br />
+            Original: <code>putInt("coins", v0)</code>
+            <br />
+            Modified: <code>const/16 v0, 0x2710</code>  <span style="color:#4a7a8a;"># 10000 coins</span>
+            <br />
+            <code>putInt("coins", v0)</code>
+            <br /><br />
+            Now when the app saves coins, it saves <strong>10000 coins</strong> instead of the normal amount! ✅
+        </div>
+
+        <p><strong>Example: Reading from SharedPreferences</strong></p>
+
+        <div class="code-block">
+<span class="comment"># Get SharedPreferences</span>
+<span class="opcode">const-string</span> <span class="register">v0</span>, <span class="string">"game_data"</span>
+<span class="opcode">const/4</span> <span class="register">v1</span>, <span class="number">0x0</span>
+<span class="opcode">invoke-virtual</span> {<span class="register">p0</span>, <span class="register">v0</span>, <span class="register">v1</span>}, <span class="class">Landroid/content/Context;</span><span class="opcode">-</span><span class="method">getSharedPreferences</span>(<span class="class">Ljava/lang/String;</span><span class="opcode">,</span> <span class="class">I</span>)<span class="class">Landroid/content/SharedPreferences;</span>
+<span class="opcode">move-result-object</span> <span class="register">v2</span>
+
+<span class="comment"># Read "coins" value (default 0)</span>
+<span class="opcode">const-string</span> <span class="register">v3</span>, <span class="string">"coins"</span>
+<span class="opcode">const/4</span> <span class="register">v4</span>, <span class="number">0x0</span>
+<span class="opcode">invoke-interface</span> {<span class="register">v2</span>, <span class="register">v3</span>, <span class="register">v4</span>}, <span class="class">Landroid/content/SharedPreferences;</span><span class="opcode">-</span><span class="method">getInt</span>(<span class="class">Ljava/lang/String;</span><span class="opcode">,</span> <span class="class">I</span>)<span class="class">I</span>
+<span class="opcode">move-result</span> <span class="register">v5</span>
+
+<span class="comment"># v5 now contains the coin value!</span>
+        </div>
+
+        <div class="highlight-box" style="border-color: rgba(0, 200, 255, 0.12);">
+            <span class="emoji">💡</span> <strong>Pro Tip:</strong><br />
+            Look for preferences with <strong>obvious names</strong>:
+            <br />
+            🔹 <code>"coins"</code>, <code>"score"</code>, <code>"level"</code> → Game data
+            <br />
+            🔹 <code>"is_vip"</code>, <code>"premium"</code>, <code>"unlocked"</code> → Premium features
+            <br />
+            🔹 <code>"settings"</code>, <code>"config"</code> → App settings
+            <br /><br />
+            Sometimes you can simply <strong>edit the preferences file</strong> directly on your device!
+        </div>
+
+        <p><strong>Example: Writing to SharedPreferences</strong></p>
+
+        <div class="code-block">
+<span class="comment"># Get editor</span>
+<span class="opcode">invoke-interface</span> {<span class="register">v2</span>}, <span class="class">Landroid/content/SharedPreferences;</span><span class="opcode">-</span><span class="method">edit</span>()<span class="class">Landroid/content/SharedPreferences$Editor;</span>
+<span class="opcode">move-result-object</span> <span class="register">v6</span>
+
+<span class="comment"># Write "coins" = 9999</span>
+<span class="opcode">const-string</span> <span class="register">v3</span>, <span class="string">"coins"</span>
+<span class="opcode">const/16</span> <span class="register">v4</span>, <span class="number">0x270F</span>   <span class="comment"># 9999</span>
+<span class="opcode">invoke-interface</span> {<span class="register">v6</span>, <span class="register">v3</span>, <span class="register">v4</span>}, <span class="class">Landroid/content/SharedPreferences$Editor;</span><span class="opcode">-</span><span class="method">putInt</span>(<span class="class">Ljava/lang/String;</span><span class="opcode">,</span> <span class="class">I</span>)<span class="class">Landroid/content/SharedPreferences$Editor;</span>
+
+<span class="comment"># Apply changes</span>
+<span class="opcode">invoke-interface</span> {<span class="register">v6</span>}, <span class="class">Landroid/content/SharedPreferences$Editor;</span><span class="opcode">-</span><span class="method">apply</span>()<span class="class">V</span>
+        </div>
+
+        <div class="highlight-box" style="border-color: rgba(255, 215, 0, 0.12);">
+            <span class="emoji">⚡</span> <strong>Quick Mod:</strong><br />
+            Find <code>getInt("coins")</code> and change the method to <strong>always return</strong> a huge value.
+            <br /><br />
+            Replace the call with:
+            <br />
+            <code>const/16 v0, 0x2710</code>  <span style="color:#4a7a8a;"># 10000</span>
+            <br />
+            <code>return v0</code>
+            <br /><br />
+            Now no matter what's saved, you'll <strong>always have 10000 coins</strong>! 🚀
+        </div>
+    </div>
+
+    <!-- PREVIEW LESSON 17 -->
+    <div class="lesson-card" style="border-left-color: #c864ff;">
+        <div class="lesson-number" style="color:#c864ff;">🔮 Lesson 17 (Preview)</div>
+        <h2 style="background: linear-gradient(135deg, #d0b0ff, #c864ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Finding VIP & Premium Code</h2>
+        <p>
+            In Lesson 17, we'll learn <strong style="color:#c864ff;">how to find VIP and premium code</strong> in Smali.
+            This is where you learn to <strong>identify and unlock</strong> premium features in any app.
+        </p>
+        <div class="highlight-box" style="border-color: rgba(200, 100, 255, 0.12);">
+            <span class="emoji">🔍</span> <strong>What to look for:</strong><br />
+            <code>is_vip</code>, <code>has_premium</code>, <code>is_pro</code>, <code>is_premium</code>, <code>getPremium</code>, <code>checkVip</code>
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <div class="footer">
+        <span class="sn">🔥 SN Mods</span> <span style="color:#4a5a6a;"> • </span>
+        <span class="heart">❤️</span> <span style="color:#4a5a6a;"> • </span>
+        <span class="tag">@Cyber_Ninja513</span><br />
+        <span style="color:#4a5a6a; font-size:0.7rem;">Smali Town • Lesson 16 of 20</span>
+    </div>
+
+</div>
+<script>
+    document.addEventListener('gesturestart', function(e){e.preventDefault();});
+    document.addEventListener('keydown', function(e){
+        if(e.ctrlKey && (e.key==='+'||e.key==='-'||e.key==='0')) e.preventDefault();
+    });
+    document.addEventListener('wheel', function(e){
+        if(e.ctrlKey) e.preventDefault();
+    }, {passive: false});
+    document.querySelector('.container').addEventListener('touchmove', function(e){
+        if(e.touches.length > 1) e.preventDefault();
+    }, {passive: false});
+    console.log('✅ SN Mods | Smali Town - Lesson 16 loaded');
+    console.log('😈 @Cyber_Ninja513');
+</script>
+</body>
+</html>
