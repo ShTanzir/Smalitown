@@ -1,0 +1,28 @@
+{
+  "cleanUrls": true,
+  "trailingSlash": false,
+  "rewrites": [
+    { "source": "/", "destination": "/index.html" },
+    { "source": "/home", "destination": "/index.html" },
+    { "source": "/Lesson01", "destination": "/snmods1.html" },
+    { "source": "/Lesson02", "destination": "/snmods2.html" },
+    { "source": "/Lesson03", "destination": "/snmods3.html" },
+    { "source": "/Lesson04", "destination": "/snmods4.html" },
+    { "source": "/Lesson05", "destination": "/snmods5.html" },
+    { "source": "/Lesson06", "destination": "/snmods6.html" },
+    { "source": "/Lesson07", "destination": "/snmods7.html" },
+    { "source": "/Lesson08", "destination": "/snmods8.html" },
+    { "source": "/Lesson09", "destination": "/snmods9.html" },
+    { "source": "/Lesson10", "destination": "/snmods10.html" },
+    { "source": "/Lesson11", "destination": "/snmods11.html" },
+    { "source": "/Lesson12", "destination": "/snmods12.html" },
+    { "source": "/Lesson13", "destination": "/snmods13.html" },
+    { "source": "/Lesson14", "destination": "/snmods14.html" },
+    { "source": "/Lesson15", "destination": "/snmods15.html" },
+    { "source": "/Lesson16", "destination": "/snmods16.html" },
+    { "source": "/Lesson17", "destination": "/snmods17.html" },
+    { "source": "/Lesson18", "destination": "/snmods18.html" },
+    { "source": "/Lesson19", "destination": "/snmods19.html" },
+    { "source": "/Lesson20", "destination": "/snmods20.html" }
+  ]
+}
