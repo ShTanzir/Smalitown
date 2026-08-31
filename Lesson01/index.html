@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>SN Mods | Smali Lesson 1</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #1a1a3e;
+            color: #e0e6f0;
+            padding: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            overflow-y: auto;
+            overflow-x: hidden;
+            background-image: 
+                radial-gradient(ellipse at 10% 20%, rgba(255, 200, 0, 0.05) 0%, transparent 50%),
+                radial-gradient(ellipse at 90% 80%, rgba(255, 100, 0, 0.05) 0%, transparent 50%);
+        }
+
+        .container {
+            max-width: 860px;
+            width: 100%;
+            background: rgba(30, 30, 60, 0.92);
+            backdrop-filter: blur(16px);
+            border-radius: 40px;
+            padding: 28px 26px;
+            border: 1px solid rgba(255, 200, 0, 0.06);
+            box-shadow: 
+                0 30px 80px rgba(0, 0, 0, 0.9),
+                inset 0 1px 0 rgba(255, 255, 255, 0.03),
+                0 0 60px rgba(255, 200, 0, 0.02);
+            margin: 10px 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .container::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: 
+                radial-gradient(circle at 30% 40%, rgba(255, 200, 0, 0.02) 0%, transparent 60%),
+                radial-gradient(circle at 70% 60%, rgba(255, 100, 0, 0.02) 0%, transparent 60%);
+            pointer-events: none;
+            animation: rotateBg 30s linear infinite;
+        }
+
+        @keyframes rotateBg {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* ===== HEADER ===== */
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 2px solid rgba(255, 200, 0, 0.08);
+            padding-bottom: 18px;
+            margin-bottom: 28px;
+            flex-wrap: wrap;
+            gap: 12px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header .brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .header .brand .logo {
+            font-size: 1.2rem;
+            color: #ffd700;
+            font-weight: 700;
+            background: rgba(255, 200, 0, 0.06);
+            padding: 4px 14px;
+            border-radius: 50px;
+            border: 1px solid rgba(255, 200, 0, 0.08);
+        }
+
+        .header h1 {
+            font-size: 1.8rem;
+            background: linear-gradient(135deg, #ffd700 0%, #ff8c00 50%, #ff2d75 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 900;
+            letter-spacing: -0.5px;
+            text-shadow: 0 0 40px rgba(255, 200, 0, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .header h1 .icon {
+            font-size: 2rem;
+            -webkit-text-fill-color: initial;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1) rotate(5deg); }
+        }
+
+        .header .badge {
+            background: linear-gradient(135deg, rgba(255, 200, 0, 0.1), rgba(255, 100, 0, 0.1));
+            padding: 6px 20px;
+            border-radius: 50px;
+            font-size: 0.8rem;
+            color: #ffd700;
+            border: 1px solid rgba(255, 200, 0, 0.15);
+            backdrop-filter: blur(4px);
+            font-weight: 600;
+            letter-spacing: 1px;
+            box-shadow: 0 0 30px rgba(255, 200, 0, 0.03);
+        }
+
+        /* ===== LESSON CARD ===== */
+        .lesson-card {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 24px;
+            padding: 24px 28px;
+            margin-bottom: 24px;
+            border-left: 5px solid;
+            border-image: linear-gradient(180deg, #ffd700, #ff8c00) 1;
+            border-left: 5px solid #ffd700;
+            box-shadow: 0 8px 40px rgba(0, 0, 0, 0.3);
+            position: relative;
+            z-index: 1;
+            transition: all 0.4s ease;
+        }
+
+        .lesson-card:hover {
+            transform: translateX(4px);
+            box-shadow: 0 12px 50px rgba(255, 200, 0, 0.05);
+            border-left-color: #ff8c00;
+        }
+
+        .lesson-card .lesson-number {
+            font-size: 0.75rem;
+            color: #ffd700;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            font-weight: 700;
+            background: rgba(255, 200, 0, 0.05);
+            display: inline-block;
+            padding: 4px 16px;
+            border-radius: 50px;
+            border: 1px solid rgba(255, 200, 0, 0.06);
+            margin-bottom: 10px;
+        }
+
+        .lesson-card h2 {
+            font-size: 1.8rem;
+            color: #f0f5ff;
+            margin: 6px 0 14px 0;
+            font-weight: 800;
+            background: linear-gradient(135deg, #e8f0ff 0%, #ffd700 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .lesson-card p {
+            line-height: 2;
+            color: #c8d4e8;
+            font-size: 1.02rem;
+        }
+
+        .lesson-card p strong {
+            color: #ffd700;
+            font-weight: 700;
+        }
+
+        /* ===== HIGHLIGHT BOX ===== */
+        .highlight-box {
+            background: linear-gradient(135deg, rgba(255, 200, 0, 0.05), rgba(255, 100, 0, 0.04));
+            border-radius: 16px;
+            padding: 16px 22px;
+            margin: 18px 0;
+            border: 1px solid rgba(255, 200, 0, 0.06);
+            box-shadow: inset 0 0 40px rgba(255, 200, 0, 0.01);
+            transition: all 0.3s ease;
+        }
+
+        .highlight-box:hover {
+            border-color: rgba(255, 200, 0, 0.15);
+            box-shadow: 0 0 40px rgba(255, 200, 0, 0.02), inset 0 0 40px rgba(255, 200, 0, 0.01);
+        }
+
+        .highlight-box .emoji {
+            font-size: 1.4rem;
+            margin-right: 8px;
+        }
+
+        .highlight-box strong {
+            color: #ffd700;
+            font-weight: 700;
+        }
+
+        .highlight-box code {
+            color: #ffd700;
+            font-family: 'Fira Code', 'Cascadia Code', monospace;
+            background: rgba(0, 0, 0, 0.4);
+            padding: 2px 12px;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            border: 1px solid rgba(255, 200, 0, 0.04);
+        }
+
+        /* ===== CODE BLOCK ===== */
+        .code-block {
+            background: #070b16;
+            border-radius: 18px;
+            padding: 20px 24px;
+            overflow-x: auto;
+            border: 1px solid rgba(255, 200, 0, 0.04);
+            font-family: 'Fira Code', 'Cascadia Code', monospace;
+            font-size: 0.92rem;
+            direction: ltr;
+            text-align: left;
+            white-space: pre-wrap;
+            color: #d4e0ff;
+            margin: 16px 0;
+            box-shadow: 
+                inset 0 4px 30px rgba(0, 0, 0, 0.6),
+                0 0 40px rgba(255, 200, 0, 0.01);
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .code-block:hover {
+            border-color: rgba(255, 200, 0, 0.1);
+            box-shadow: 
+                inset 0 4px 30px rgba(0, 0, 0, 0.6),
+                0 0 60px rgba(255, 200, 0, 0.02);
+        }
+
+        .code-block .comment { color: #4a7a8a; font-style: italic; }
+        .code-block .keyword { color: #ff79c6; font-weight: 700; }
+        .code-block .string { color: #f1fa8c; }
+        .code-block .number { color: #bd93f9; font-weight: 600; }
+        .code-block .class { color: #8be9fd; font-weight: 600; }
+        .code-block .method { color: #50fa7b; font-weight: 600; }
+        .code-block .opcode { color: #50fa7b; font-weight: 700; }
+        .code-block .register { color: #ffb86c; font-weight: 600; }
+
+        /* ===== TABLE ===== */
+        .table-wrap {
+            overflow-x: auto;
+            margin: 18px 0;
+            border-radius: 18px;
+            border: 1px solid rgba(255, 255, 255, 0.03);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: rgba(0, 0, 0, 0.25);
+            font-size: 0.95rem;
+        }
+
+        th {
+            background: linear-gradient(135deg, rgba(255, 200, 0, 0.06), rgba(255, 100, 0, 0.06));
+            color: #ffd700;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            font-size: 0.75rem;
+            padding: 14px 18px;
+            border-bottom: 2px solid rgba(255, 200, 0, 0.04);
+        }
+
+        td {
+            padding: 13px 18px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.02);
+            color: #c8d4e8;
+        }
+
+        tr:hover td {
+            background: rgba(255, 200, 0, 0.02);
+        }
+
+        td code {
+            color: #8be9fd;
+            font-family: 'Fira Code', monospace;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 2px 10px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+        }
+
+        /* ===== FOOTER ===== */
+        .footer {
+            text-align: center;
+            margin-top: 28px;
+            color: #3a4a5a;
+            font-size: 0.8rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.02);
+            padding-top: 20px;
+            position: relative;
+            z-index: 1;
+            letter-spacing: 0.5px;
+        }
+
+        .footer .sn {
+            background: linear-gradient(135deg, #ffd700, #ff8c00);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 700;
+            font-size: 1rem;
+        }
+
+        .footer .heart {
+            color: #ff2d75;
+            -webkit-text-fill-color: initial;
+            animation: pulse 1.5s ease-in-out infinite;
+            display: inline-block;
+        }
+
+        .footer .tag {
+            color: #88aaff;
+            font-weight: 600;
+        }
+
+        @media (max-width: 600px) {
+            .container { padding: 16px 14px; }
+            .header h1 { font-size: 1.4rem; }
+            .lesson-card h2 { font-size: 1.3rem; }
+            .lesson-card { padding: 18px 16px; }
+            .code-block { font-size: 0.75rem; padding: 14px 16px; }
+            .highlight-box { padding: 14px 16px; }
+            th, td { padding: 10px 12px; font-size: 0.85rem; }
+            .header .brand .logo { font-size: 0.9rem; }
+        }
+
+        ::-webkit-scrollbar {
+            width: 5px;
+            height: 5px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, #ffd700, #ff8c00);
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(180deg, #ffe44d, #ffa64d);
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <!-- ===== HEADER ===== -->
+    <div class="header">
+        <div class="brand">
+            <span class="logo">🔥 SN Mods</span>
+        </div>
+        <h1>
+            <span class="icon">🏘️</span>
+            Smali Town
+        </h1>
+        <span class="badge">📘 Lesson 1 / 20</span>
+    </div>
+
+    <!-- ===== LESSON ===== -->
+    <div class="lesson-card">
+        <div class="lesson-number">📖 Lesson 1</div>
+        <h2>What is Smali?</h2>
+
+        <p>
+            <strong>Smali</strong> is an intermediate language for Android. It is the human-readable representation of 
+            <strong>Dalvik bytecode</strong> (DEX files). When you decompile an APK using tools like 
+            <strong>APKTool</strong> or <strong>JADX</strong>, the Java/Kotlin code is converted into Smali code.
+        </p>
+
+        <div class="highlight-box">
+            <span class="emoji">💡</span> <strong>Why is Smali important?</strong><br />
+            To <strong>mod, hack, remove ads, unlock VIP features, or change app behavior</strong>, 
+            you must understand Smali. Because this is the actual code that runs on the device!
+        </div>
+
+        <p><strong>Structure of a Smali file:</strong></p>
+
+        <div class="code-block">
+<span class="comment"># A simple Smali class</span>
+<span class="keyword">.class</span> <span class="class">public</span> <span class="class">Lcom/example/MainActivity;</span>
+<span class="keyword">.super</span> <span class="class">Landroid/app/Activity;</span>
+<span class="keyword">.source</span> <span class="string">"MainActivity.java"</span>
+
+<span class="comment"># Fields</span>
+<span class="keyword">.field</span> <span class="keyword">private</span> <span class="register">is_vip</span>:<span class="class">Z</span>
+
+<span class="comment"># Methods</span>
+<span class="keyword">.method</span> <span class="keyword">public</span> <span class="method">onCreate</span>(<span class="class">Landroid/os/Bundle;</span>)<span class="class">V</span>
+    <span class="opcode">.locals</span> <span class="number">1</span>
+    <span class="opcode">.prologue</span>
+    <span class="opcode">const/4</span> <span class="register">v0</span>, <span class="number">0x1</span>
+    <span class="opcode">return-void</span>
+<span class="keyword">.end method</span>
+        </div>
+
+        <div class="highlight-box" style="border-color: rgba(255, 215, 0, 0.12);">
+            <span class="emoji">🔥</span> <strong style="color: #ffd700;">Key Point:</strong><br />
+            Everything you see in an app <span style="color: #ffd700;">(buttons, text, locked features)</span> is controlled by 
+            <strong>Smali code</strong>. By modifying it, you can do <span style="color: #50fa7b;">anything</span>!
+        </div>
+    </div>
+
+    <!-- ===== PREVIEW LESSON 2 ===== -->
+    <div class="lesson-card" style="border-left-color: #ff8c00; border-image: linear-gradient(180deg, #ff8c00, #ff2d75) 1; border-left: 5px solid #ff8c00;">
+        <div class="lesson-number" style="color: #ff8c00;">🔮 Lesson 2 (Preview)</div>
+        <h2 style="background: linear-gradient(135deg, #ffe0b0, #ff8c00); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Data Types & Registers</h2>
+        <p>
+            Smali uses specific <strong style="color: #ff8c00;">data types</strong> and <strong style="color: #ffb86c;">registers</strong> to store and manipulate data.
+            Here's a quick reference:
+        </p>
+
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr><th>Smali Type</th><th>Meaning</th><th>Java Example</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td><code>V</code></td><td>void</td><td><code>void do()</code></td></tr>
+                    <tr><td><code>Z</code></td><td>boolean</td><td><code>true / false</code></td></tr>
+                    <tr><td><code>I</code></td><td>int</td><td><code>5</code></td></tr>
+                    <tr><td><code>J</code></td><td>long</td><td><code>100L</code></td></tr>
+                    <tr><td><code>F</code></td><td>float</td><td><code>3.14f</code></td></tr>
+                    <tr><td><code>D</code></td><td>double</td><td><code>2.718</code></td></tr>
+                    <tr><td><code>Ljava/lang/String;</code></td><td>String</td><td><code>"Hello"</code></td></tr>
+                    <tr><td><code>[I</code></td><td>int[]</td><td>Array</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="highlight-box" style="border-color: rgba(255, 140, 0, 0.12);">
+            <span class="emoji">📌</span> <strong style="color: #ff8c00;">Registers:</strong><br />
+            <code style="color: #ffb86c;">v0</code> to <code style="color: #ffb86c;">vN</code> = Local variables &nbsp;|&nbsp; <code style="color: #ffb86c;">p0</code> = <code style="color: #ffb86c;">this</code> (in non-static methods)
+        </div>
+    </div>
+
+    <!-- ===== FOOTER ===== -->
+    <div class="footer">
+        <span class="sn">🔥 SN Mods</span>
+        <span style="color: #4a5a6a;"> • </span>
+        <span class="heart">❤️</span>
+        <span style="color: #4a5a6a;"> • </span>
+        <span class="tag">@Cyber_Ninja513</span>
+        <br />
+        <span style="color: #4a5a6a; font-size: 0.7rem;">Smali Town • Lesson 1 of 20</span>
+    </div>
+
+</div>
+
+<script>
+    document.addEventListener('gesturestart', function(e) { e.preventDefault(); });
+    document.addEventListener('keydown', function(e) {
+        if (e.ctrlKey && (e.key === '+' || e.key === '-' || e.key === '0')) {
+            e.preventDefault();
+        }
+    });
+    document.addEventListener('wheel', function(e) {
+        if (e.ctrlKey) e.preventDefault();
+    }, { passive: false });
+
+    document.querySelector('.container').addEventListener('touchmove', function(e) {
+        if (e.touches.length > 1) {
+            e.preventDefault();
+        }
+    }, { passive: false });
+
+    console.log('✅ SN Mods | Smali Town - Lesson 1 loaded');
+    console.log('😈 @Cyber_Ninja513');
+</script>
+
+</body>
+</html>

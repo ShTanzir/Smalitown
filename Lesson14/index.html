@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>SN Mods | Smali Lesson 14</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0f0f2a;
+            color: #e0e6f0;
+            padding: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            overflow-y: auto;
+            overflow-x: hidden;
+            background-image:
+                radial-gradient(ellipse at 10% 20%, rgba(0, 255, 150, 0.06) 0%, transparent 50%),
+                radial-gradient(ellipse at 90% 80%, rgba(0, 200, 255, 0.06) 0%, transparent 50%);
+        }
+        .container {
+            max-width: 860px;
+            width: 100%;
+            background: rgba(20, 20, 50, 0.92);
+            backdrop-filter: blur(16px);
+            border-radius: 40px;
+            padding: 28px 26px;
+            border: 1px solid rgba(0, 255, 150, 0.06);
+            box-shadow: 0 30px 80px rgba(0,0,0,0.9);
+            margin: 10px 0;
+            position: relative;
+            overflow: hidden;
+        }
+        .container::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle at 30% 40%, rgba(0,255,150,0.02), transparent 60%),
+                        radial-gradient(circle at 70% 60%, rgba(0,200,255,0.02), transparent 60%);
+            pointer-events: none;
+            animation: rotateBg 30s linear infinite;
+        }
+        @keyframes rotateBg {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 2px solid rgba(0, 255, 150, 0.08);
+            padding-bottom: 18px;
+            margin-bottom: 28px;
+            flex-wrap: wrap;
+            gap: 12px;
+            position: relative;
+            z-index: 1;
+        }
+        .header .brand .logo {
+            font-size: 1.2rem;
+            color: #00ff96;
+            font-weight: 700;
+            background: rgba(0,255,150,0.06);
+            padding: 4px 14px;
+            border-radius: 50px;
+            border: 1px solid rgba(0,255,150,0.08);
+        }
+        .header h1 {
+            font-size: 1.8rem;
+            background: linear-gradient(135deg, #00ff96, #00a3ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 900;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .header h1 .icon { font-size: 2rem; animation: pulse 2s infinite; }
+        @keyframes pulse { 0%,100%{transform:scale(1);} 50%{transform:scale(1.1) rotate(5deg);} }
+        .header .badge {
+            background: rgba(0,255,150,0.1);
+            padding: 6px 20px;
+            border-radius: 50px;
+            font-size: 0.8rem;
+            color: #00ff96;
+            border: 1px solid rgba(0,255,150,0.15);
+            font-weight: 600;
+        }
+        .lesson-card {
+            background: rgba(0,0,0,0.3);
+            border-radius: 24px;
+            padding: 24px 28px;
+            margin-bottom: 24px;
+            border-left: 5px solid #00ff96;
+            box-shadow: 0 8px 40px rgba(0,0,0,0.3);
+            position: relative;
+            z-index: 1;
+            transition: 0.3s;
+        }
+        .lesson-card:hover { transform: translateX(4px); border-left-color: #00a3ff; }
+        .lesson-card .lesson-number {
+            font-size: 0.75rem;
+            color: #00ff96;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            font-weight: 700;
+            background: rgba(0,255,150,0.05);
+            display: inline-block;
+            padding: 4px 16px;
+            border-radius: 50px;
+            border: 1px solid rgba(0,255,150,0.06);
+            margin-bottom: 10px;
+        }
+        .lesson-card h2 {
+            font-size: 1.8rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #fff, #00ff96);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin: 6px 0 14px 0;
+        }
+        .lesson-card p { line-height: 2; color: #c8d4e8; font-size: 1.02rem; }
+        .lesson-card p strong { color: #00ff96; }
+        .highlight-box {
+            background: rgba(0,255,150,0.05);
+            border-radius: 16px;
+            padding: 16px 22px;
+            margin: 18px 0;
+            border: 1px solid rgba(0,255,150,0.06);
+            transition: 0.3s;
+        }
+        .highlight-box:hover { border-color: rgba(0,255,150,0.15); }
+        .highlight-box .emoji { font-size: 1.4rem; margin-right: 8px; }
+        .highlight-box strong { color: #00ff96; }
+        .highlight-box code {
+            color: #00ff96;
+            font-family: 'Fira Code', monospace;
+            background: rgba(0,0,0,0.4);
+            padding: 2px 12px;
+            border-radius: 6px;
+            font-size: 0.9rem;
+        }
+        .code-block {
+            background: #070b16;
+            border-radius: 18px;
+            padding: 20px 24px;
+            overflow-x: auto;
+            border: 1px solid rgba(0,255,150,0.04);
+            font-family: 'Fira Code', monospace;
+            font-size: 0.92rem;
+            direction: ltr;
+            text-align: left;
+            white-space: pre-wrap;
+            color: #d4e0ff;
+            margin: 16px 0;
+            box-shadow: inset 0 4px 30px rgba(0,0,0,0.6);
+            transition: 0.3s;
+        }
+        .code-block:hover { border-color: rgba(0,255,150,0.1); }
+        .code-block .comment { color: #4a7a8a; font-style: italic; }
+        .code-block .keyword { color: #ff79c6; font-weight: 700; }
+        .code-block .string { color: #f1fa8c; }
+        .code-block .number { color: #bd93f9; font-weight: 600; }
+        .code-block .class { color: #8be9fd; font-weight: 600; }
+        .code-block .method { color: #50fa7b; font-weight: 600; }
+        .code-block .opcode { color: #50fa7b; font-weight: 700; }
+        .code-block .register { color: #ffb86c; font-weight: 600; }
+        .code-block .label { color: #ffd700; font-weight: 600; }
+        .table-wrap {
+            overflow-x: auto;
+            margin: 18px 0;
+            border-radius: 18px;
+            border: 1px solid rgba(255,255,255,0.03);
+            box-shadow: 0 4px 30px rgba(0,0,0,0.2);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: rgba(0,0,0,0.25);
+            font-size: 0.95rem;
+        }
+        th {
+            background: rgba(0,255,150,0.06);
+            color: #00ff96;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            font-size: 0.75rem;
+            padding: 14px 18px;
+            border-bottom: 2px solid rgba(0,255,150,0.04);
+        }
+        td {
+            padding: 13px 18px;
+            border-bottom: 1px solid rgba(255,255,255,0.02);
+            color: #c8d4e8;
+        }
+        tr:hover td { background: rgba(0,255,150,0.02); }
+        td code {
+            color: #8be9fd;
+            font-family: 'Fira Code', monospace;
+            background: rgba(0,0,0,0.3);
+            padding: 2px 10px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 28px;
+            color: #4a5a6a;
+            font-size: 0.8rem;
+            border-top: 1px solid rgba(255,255,255,0.02);
+            padding-top: 20px;
+            position: relative;
+            z-index: 1;
+        }
+        .footer .sn {
+            background: linear-gradient(135deg, #00ff96, #00a3ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 700;
+            font-size: 1rem;
+        }
+        .footer .heart { color: #ff2d75; animation: pulse 1.5s infinite; display: inline-block; }
+        .footer .tag { color: #88aaff; font-weight: 600; }
+        @media (max-width: 600px) {
+            .container { padding: 16px 14px; }
+            .header h1 { font-size: 1.4rem; }
+            .lesson-card h2 { font-size: 1.3rem; }
+            .lesson-card { padding: 18px 16px; }
+            .code-block { font-size: 0.75rem; padding: 14px 16px; }
+            .highlight-box { padding: 14px 16px; }
+            th, td { padding: 10px 12px; font-size: 0.85rem; }
+            .header .brand .logo { font-size: 0.9rem; }
+        }
+        ::-webkit-scrollbar { width: 5px; height: 5px; }
+        ::-webkit-scrollbar-track { background: rgba(255,255,255,0.02); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb { background: linear-gradient(180deg, #00ff96, #00a3ff); border-radius: 10px; }
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <!-- HEADER -->
+    <div class="header">
+        <div class="brand"><span class="logo">🔥 SN Mods</span></div>
+        <h1><span class="icon">🏘️</span> Smali Town</h1>
+        <span class="badge">📘 Lesson 14 / 20</span>
+    </div>
+
+    <!-- LESSON 14 -->
+    <div class="lesson-card">
+        <div class="lesson-number">📖 Lesson 14</div>
+        <h2>Math & Calculations</h2>
+
+        <p>
+            <strong>Mathematical operations</strong> are everywhere in apps - <strong>score calculations, damage formulas, coin additions, timer logic, and more</strong>.
+            In Smali, these are done with math OpCodes.
+        </p>
+
+        <div class="highlight-box">
+            <span class="emoji">🧮</span> <strong>Why math matters for modding:</strong><br />
+            Math controls <strong>game mechanics, reward systems, leveling, and in-app purchases</strong>.
+            By modifying calculations, you can <strong>give yourself infinite resources, max stats, or unlock everything</strong>!
+        </div>
+
+        <p><strong>Math OpCodes:</strong></p>
+
+        <div class="table-wrap">
+            <table>
+                <thead><tr><th>OpCode</th><th>Operation</th><th>Example</th></tr></thead>
+                <tbody>
+                    <tr><td><code>add-int</code></td><td>Addition</td><td><code>add-int v0, v1, v2</code></td></tr>
+                    <tr><td><code>add-int/lit8</code></td><td>Add with literal</td><td><code>add-int/lit8 v0, v1, 0x5</code></td></tr>
+                    <tr><td><code>sub-int</code></td><td>Subtraction</td><td><code>sub-int v0, v1, v2</code></td></tr>
+                    <tr><td><code>mul-int</code></td><td>Multiplication</td><td><code>mul-int v0, v1, v2</code></td></tr>
+                    <tr><td><code>div-int</code></td><td>Division</td><td><code>div-int v0, v1, v2</code></td></tr>
+                    <tr><td><code>rem-int</code></td><td>Remainder (mod)</td><td><code>rem-int v0, v1, v2</code></td></tr>
+                    <tr><td><code>neg-int</code></td><td>Negate</td><td><code>neg-int v0, v1</code></td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="highlight-box" style="border-color: rgba(255, 215, 0, 0.12);">
+            <span class="emoji">🔥</span> <strong>Modding Example: Infinite Coins</strong><br />
+            Find the code that adds coins to your balance.
+            <br /><br />
+            Original: <code>add-int v0, v1, v2</code>
+            <br />
+            Modified: <code>const/16 v0, 0x2710</code>  <span style="color:#4a7a8a;"># 10000 coins</span>
+            <br /><br />
+            Now <strong>you always get 10000 coins</strong> instead of the normal amount! ✅
+        </div>
+
+        <p><strong>Common Math Modding Scenarios:</strong></p>
+
+        <div class="code-block">
+<span class="comment"># 1. Score multiplier</span>
+<span class="comment"># Original: multiply score by 1</span>
+<span class="opcode">mul-int</span> <span class="register">v0</span>, <span class="register">v1</span>, <span class="register">v2</span>
+<span class="comment"># Change to multiply by 100:</span>
+<span class="opcode">mul-int/lit8</span> <span class="register">v0</span>, <span class="register">v1</span>, <span class="number">0x64</span>
+
+<span class="comment"># 2. Unlimited health</span>
+<span class="comment"># Original: health = health - damage</span>
+<span class="opcode">sub-int</span> <span class="register">v0</span>, <span class="register">v1</span>, <span class="register">v2</span>
+<span class="comment"># Change to: health = health + damage (heal instead of hurt!)</span>
+<span class="opcode">add-int</span> <span class="register">v0</span>, <span class="register">v1</span>, <span class="register">v2</span>
+
+<span class="comment"># 3. Level up requirement</span>
+<span class="comment"># Original: if (experience > maxExp) level++</span>
+<span class="opcode">if-le</span> <span class="register">v0</span>, <span class="register">v1</span>, <span class="label">:no_level_up</span>
+<span class="comment"># Change to: always level up!</span>
+<span class="opcode">goto</span> <span class="label">:level_up</span>
+        </div>
+
+        <div class="highlight-box" style="border-color: rgba(0, 200, 255, 0.12);">
+            <span class="emoji">💡</span> <strong>Pro Tip:</strong><br />
+            Look for math operations in <strong>game loops, reward functions, and shop systems</strong>.
+            <br />
+            Common targets:
+            <br />
+            🔹 <code>add-int</code> → Look for coin/score additions
+            <br />
+            🔹 <code>sub-int</code> → Look for health/damage reductions
+            <br />
+            🔹 <code>mul-int</code> → Look for multipliers or percentages
+            <br />
+            🔹 <code>div-int</code> → Look for divisions (often used in leveling)
+        </div>
+
+        <p><strong>Floating Point Math (for float/double values):</strong></p>
+
+        <div class="code-block">
+<span class="comment"># Float operations (for values with decimals)</span>
+<span class="opcode">add-float</span> <span class="register">v0</span>, <span class="register">v1</span>, <span class="register">v2</span>
+<span class="opcode">sub-float</span> <span class="register">v0</span>, <span class="register">v1</span>, <span class="register">v2</span>
+<span class="opcode">mul-float</span> <span class="register">v0</span>, <span class="register">v1</span>, <span class="register">v2</span>
+<span class="opcode">div-float</span> <span class="register">v0</span>, <span class="register">v1</span>, <span class="register">v2</span>
+
+<span class="comment"># Double operations (more precise)</span>
+<span class="opcode">add-double</span> <span class="register">v0</span>, <span class="register">v2</span>, <span class="register">v4</span>
+        </div>
+
+        <div class="highlight-box" style="border-color: rgba(255, 215, 0, 0.12);">
+            <span class="emoji">⚡</span> <strong>Quick Mod:</strong><br />
+            Find any <code>add-int</code> or <code>mul-int</code> in the app.
+            <br />
+            <strong>Change the result</strong> to a much larger value.
+            <br />
+            For example: <code>const/16 v0, 0x3E7</code> (999) instead of the calculated value.
+            <br /><br />
+            This gives you <strong>massive amounts of whatever</strong> the app is calculating! 🚀
+        </div>
+    </div>
+
+    <!-- PREVIEW LESSON 15 -->
+    <div class="lesson-card" style="border-left-color: #00a3ff;">
+        <div class="lesson-number" style="color:#00a3ff;">🔮 Lesson 15 (Preview)</div>
+        <h2 style="background: linear-gradient(135deg, #b0d0ff, #00a3ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Type Casting</h2>
+        <p>
+            In Lesson 15, we'll learn about <strong style="color:#00a3ff;">type casting</strong> in Smali.
+            This is how you convert between different data types (e.g., int to long, object to specific type).
+        </p>
+        <div class="highlight-box" style="border-color: rgba(0, 163, 255, 0.12);">
+            <span class="emoji">📌</span> <strong>Key OpCodes:</strong><br />
+            <code>check-cast</code> → Cast an object to a specific type<br />
+            <code>instanceof</code> → Check if an object is of a specific type
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <div class="footer">
+        <span class="sn">🔥 SN Mods</span> <span style="color:#4a5a6a;"> • </span>
+        <span class="heart">❤️</span> <span style="color:#4a5a6a;"> • </span>
+        <span class="tag">@Cyber_Ninja513</span><br />
+        <span style="color:#4a5a6a; font-size:0.7rem;">Smali Town • Lesson 14 of 20</span>
+    </div>
+
+</div>
+<script>
+    document.addEventListener('gesturestart', function(e){e.preventDefault();});
+    document.addEventListener('keydown', function(e){
+        if(e.ctrlKey && (e.key==='+'||e.key==='-'||e.key==='0')) e.preventDefault();
+    });
+    document.addEventListener('wheel', function(e){
+        if(e.ctrlKey) e.preventDefault();
+    }, {passive: false});
+    document.querySelector('.container').addEventListener('touchmove', function(e){
+        if(e.touches.length > 1) e.preventDefault();
+    }, {passive: false});
+    console.log('✅ SN Mods | Smali Town - Lesson 14 loaded');
+    console.log('😈 @Cyber_Ninja513');
+</script>
+</body>
+</html>

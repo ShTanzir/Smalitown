@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>SN Mods | Smali Lesson 18</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0f0f2a;
+            color: #e0e6f0;
+            padding: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            overflow-y: auto;
+            overflow-x: hidden;
+            background-image:
+                radial-gradient(ellipse at 10% 20%, rgba(255, 50, 50, 0.06) 0%, transparent 50%),
+                radial-gradient(ellipse at 90% 80%, rgba(255, 50, 50, 0.06) 0%, transparent 50%);
+        }
+        .container {
+            max-width: 860px;
+            width: 100%;
+            background: rgba(20, 20, 50, 0.92);
+            backdrop-filter: blur(16px);
+            border-radius: 40px;
+            padding: 28px 26px;
+            border: 1px solid rgba(255, 50, 50, 0.06);
+            box-shadow: 0 30px 80px rgba(0,0,0,0.9);
+            margin: 10px 0;
+            position: relative;
+            overflow: hidden;
+        }
+        .container::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle at 30% 40%, rgba(255,50,50,0.02), transparent 60%),
+                        radial-gradient(circle at 70% 60%, rgba(255,50,50,0.02), transparent 60%);
+            pointer-events: none;
+            animation: rotateBg 30s linear infinite;
+        }
+        @keyframes rotateBg {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 2px solid rgba(255, 50, 50, 0.08);
+            padding-bottom: 18px;
+            margin-bottom: 28px;
+            flex-wrap: wrap;
+            gap: 12px;
+            position: relative;
+            z-index: 1;
+        }
+        .header .brand .logo {
+            font-size: 1.2rem;
+            color: #ff3232;
+            font-weight: 700;
+            background: rgba(255,50,50,0.06);
+            padding: 4px 14px;
+            border-radius: 50px;
+            border: 1px solid rgba(255,50,50,0.08);
+        }
+        .header h1 {
+            font-size: 1.8rem;
+            background: linear-gradient(135deg, #ff3232, #ff6b00);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 900;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .header h1 .icon { font-size: 2rem; animation: pulse 2s infinite; }
+        @keyframes pulse { 0%,100%{transform:scale(1);} 50%{transform:scale(1.1) rotate(5deg);} }
+        .header .badge {
+            background: rgba(255,50,50,0.1);
+            padding: 6px 20px;
+            border-radius: 50px;
+            font-size: 0.8rem;
+            color: #ff3232;
+            border: 1px solid rgba(255,50,50,0.15);
+            font-weight: 600;
+        }
+        .lesson-card {
+            background: rgba(0,0,0,0.3);
+            border-radius: 24px;
+            padding: 24px 28px;
+            margin-bottom: 24px;
+            border-left: 5px solid #ff3232;
+            box-shadow: 0 8px 40px rgba(0,0,0,0.3);
+            position: relative;
+            z-index: 1;
+            transition: 0.3s;
+        }
+        .lesson-card:hover { transform: translateX(4px); border-left-color: #ff6b00; }
+        .lesson-card .lesson-number {
+            font-size: 0.75rem;
+            color: #ff3232;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            font-weight: 700;
+            background: rgba(255,50,50,0.05);
+            display: inline-block;
+            padding: 4px 16px;
+            border-radius: 50px;
+            border: 1px solid rgba(255,50,50,0.06);
+            margin-bottom: 10px;
+        }
+        .lesson-card h2 {
+            font-size: 1.8rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #fff, #ff3232);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin: 6px 0 14px 0;
+        }
+        .lesson-card p { line-height: 2; color: #c8d4e8; font-size: 1.02rem; }
+        .lesson-card p strong { color: #ff3232; }
+        .highlight-box {
+            background: rgba(255,50,50,0.05);
+            border-radius: 16px;
+            padding: 16px 22px;
+            margin: 18px 0;
+            border: 1px solid rgba(255,50,50,0.06);
+            transition: 0.3s;
+        }
+        .highlight-box:hover { border-color: rgba(255,50,50,0.15); }
+        .highlight-box .emoji { font-size: 1.4rem; margin-right: 8px; }
+        .highlight-box strong { color: #ff3232; }
+        .highlight-box code {
+            color: #ff3232;
+            font-family: 'Fira Code', monospace;
+            background: rgba(0,0,0,0.4);
+            padding: 2px 12px;
+            border-radius: 6px;
+            font-size: 0.9rem;
+        }
+        .code-block {
+            background: #070b16;
+            border-radius: 18px;
+            padding: 20px 24px;
+            overflow-x: auto;
+            border: 1px solid rgba(255,50,50,0.04);
+            font-family: 'Fira Code', monospace;
+            font-size: 0.92rem;
+            direction: ltr;
+            text-align: left;
+            white-space: pre-wrap;
+            color: #d4e0ff;
+            margin: 16px 0;
+            box-shadow: inset 0 4px 30px rgba(0,0,0,0.6);
+            transition: 0.3s;
+        }
+        .code-block:hover { border-color: rgba(255,50,50,0.1); }
+        .code-block .comment { color: #4a7a8a; font-style: italic; }
+        .code-block .keyword { color: #ff79c6; font-weight: 700; }
+        .code-block .string { color: #f1fa8c; }
+        .code-block .number { color: #bd93f9; font-weight: 600; }
+        .code-block .class { color: #8be9fd; font-weight: 600; }
+        .code-block .method { color: #50fa7b; font-weight: 600; }
+        .code-block .opcode { color: #50fa7b; font-weight: 700; }
+        .code-block .register { color: #ffb86c; font-weight: 600; }
+        .code-block .label { color: #ffd700; font-weight: 600; }
+        .table-wrap {
+            overflow-x: auto;
+            margin: 18px 0;
+            border-radius: 18px;
+            border: 1px solid rgba(255,255,255,0.03);
+            box-shadow: 0 4px 30px rgba(0,0,0,0.2);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: rgba(0,0,0,0.25);
+            font-size: 0.95rem;
+        }
+        th {
+            background: rgba(255,50,50,0.06);
+            color: #ff3232;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            font-size: 0.75rem;
+            padding: 14px 18px;
+            border-bottom: 2px solid rgba(255,50,50,0.04);
+        }
+        td {
+            padding: 13px 18px;
+            border-bottom: 1px solid rgba(255,255,255,0.02);
+            color: #c8d4e8;
+        }
+        tr:hover td { background: rgba(255,50,50,0.02); }
+        td code {
+            color: #8be9fd;
+            font-family: 'Fira Code', monospace;
+            background: rgba(0,0,0,0.3);
+            padding: 2px 10px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 28px;
+            color: #4a5a6a;
+            font-size: 0.8rem;
+            border-top: 1px solid rgba(255,255,255,0.02);
+            padding-top: 20px;
+            position: relative;
+            z-index: 1;
+        }
+        .footer .sn {
+            background: linear-gradient(135deg, #ff3232, #ff6b00);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 700;
+            font-size: 1rem;
+        }
+        .footer .heart { color: #ff2d75; animation: pulse 1.5s infinite; display: inline-block; }
+        .footer .tag { color: #88aaff; font-weight: 600; }
+        @media (max-width: 600px) {
+            .container { padding: 16px 14px; }
+            .header h1 { font-size: 1.4rem; }
+            .lesson-card h2 { font-size: 1.3rem; }
+            .lesson-card { padding: 18px 16px; }
+            .code-block { font-size: 0.75rem; padding: 14px 16px; }
+            .highlight-box { padding: 14px 16px; }
+            th, td { padding: 10px 12px; font-size: 0.85rem; }
+            .header .brand .logo { font-size: 0.9rem; }
+        }
+        ::-webkit-scrollbar { width: 5px; height: 5px; }
+        ::-webkit-scrollbar-track { background: rgba(255,255,255,0.02); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb { background: linear-gradient(180deg, #ff3232, #ff6b00); border-radius: 10px; }
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <!-- HEADER -->
+    <div class="header">
+        <div class="brand"><span class="logo">🔥 SN Mods</span></div>
+        <h1><span class="icon">🏘️</span> Smali Town</h1>
+        <span class="badge">📘 Lesson 18 / 20</span>
+    </div>
+
+    <!-- LESSON 18 -->
+    <div class="lesson-card">
+        <div class="lesson-number">📖 Lesson 18</div>
+        <h2>Advanced Modding Techniques</h2>
+
+        <p>
+            Now that you understand the basics, it's time for <strong>advanced modding techniques</strong>.
+            These methods will help you <strong>bypass complex protections</strong> and <strong>inject your own code</strong>.
+        </p>
+
+        <div class="highlight-box">
+            <span class="emoji">🧠</span> <strong>What you'll learn:</strong><br />
+            🔸 <strong>Method Patching</strong> - Completely replace a method
+            <br />
+            🔸 <strong>Code Injection</strong> - Add your own code to the app
+            <br />
+            🔸 <strong>Bypassing Protections</strong> - Defeat anti-modding measures
+            <br />
+            🔸 <strong>Signature Spoofing</strong> - Fake license verification
+        </div>
+
+        <p><strong>1. Method Patching (Full Replacement)</strong></p>
+
+        <div class="code-block">
+<span class="comment"># Original method that checks license</span>
+<span class="keyword">.method</span> <span class="keyword">public</span> <span class="method">verifyLicense</span>()<span class="class">Z</span>
+    <span class="opcode">.locals</span> <span class="number">1</span>
+    <span class="opcode">.prologue</span>
+
+    <span class="comment"># Complex verification logic</span>
+    <span class="opcode">invoke-static</span> <span class="opcode">{}</span>, <span class="class">Lcom/example/License;</span><span class="opcode">-</span><span class="method">check</span>()<span class="class">Z</span>
+    <span class="opcode">move-result</span> <span class="register">v0</span>
+    <span class="opcode">return</span> <span class="register">v0</span>
+<span class="keyword">.end method</span>
+
+<span class="comment"># AFTER PATCH: Always returns true</span>
+<span class="keyword">.method</span> <span class="keyword">public</span> <span class="method">verifyLicense</span>()<span class="class">Z</span>
+    <span class="opcode">.locals</span> <span class="number">1</span>
+    <span class="opcode">.prologue</span>
+
+    <span class="opcode">const/4</span> <span class="register">v0</span>, <span class="number">0x1</span>
+    <span class="opcode">return</span> <span class="register">v0</span>
+<span class="keyword">.end method</span>
+        </div>
+
+        <div class="highlight-box" style="border-color: rgba(255, 215, 0, 0.12);">
+            <span class="emoji">🔥</span> <strong>Advanced Patching:</strong><br />
+            You can also <strong>add new code</strong> to existing methods:
+            <br /><br />
+            <code>const/4 v0, 0x1</code><br />
+            <code>iput v0, p0, Lcom/example/User;->is_vip:Z</code>
+            <br /><br />
+            This forces the VIP field to <strong>always be true</strong>!
+        </div>
+
+        <p><strong>2. Code Injection</strong></p>
+
+        <div class="code-block">
+<span class="comment"># Inject a toast message before the method returns</span>
+<span class="keyword">.method</span> <span class="keyword">public</span> <span class="method">doSomething</span>()<span class="class">V</span>
+    <span class="opcode">.locals</span> <span class="number">2</span>
+    <span class="opcode">.prologue</span>
+
+    <span class="comment"># INJECT: Show "Mod Activated!" toast</span>
+    <span class="opcode">const-string</span> <span class="register">v0</span>, <span class="string">"Mod Activated! 😈"</span>
+    <span class="opcode">const/4</span> <span class="register">v1</span>, <span class="number">0x0</span>
+    <span class="opcode">invoke-static</span> {<span class="register">p0</span>, <span class="register">v0</span>, <span class="register">v1</span>}, <span class="class">Landroid/widget/Toast;</span><span class="opcode">-</span><span class="method">makeText</span>(<span class="class">Landroid/content/Context;</span><span class="opcode">,</span> <span class="class">Ljava/lang/CharSequence;</span><span class="opcode">,</span> <span class="class">I</span>)<span class="class">Landroid/widget/Toast;</span>
+    <span class="opcode">move-result-object</span> <span class="register">v0</span>
+    <span class="opcode">invoke-virtual</span> {<span class="register">v0</span>}, <span class="class">Landroid/widget/Toast;</span><span class="opcode">-</span><span class="method">show</span>()<span class="class">V</span>
+
+    <span class="comment"># Original code continues...</span>
+    <span class="opcode">return-void</span>
+<span class="keyword">.end method</span>
+        </div>
+
+        <div class="highlight-box" style="border-color: rgba(0, 200, 255, 0.12);">
+            <span class="emoji">💡</span> <strong>Pro Tip:</strong><br />
+            When injecting code, always check <strong>where you're injecting</strong>.
+            <br /><br />
+            Best places to inject:
+            <br />
+            🔹 <strong>At the beginning</strong> of a method (before any checks)
+            <br />
+            🔹 <strong>Before return</strong> (to modify the output)
+            <br />
+            🔹 <strong>In constructors</strong> (to set default values)
+            <br /><br />
+            Wrong injection can cause <strong>crashes</strong>!
+        </div>
+
+        <p><strong>3. Bypassing ProGuard/Obfuscation</strong></p>
+
+        <div class="highlight-box" style="border-color: rgba(255, 215, 0, 0.12);">
+            <span class="emoji">🛡️</span> <strong>How to handle obfuscated code:</strong><br />
+            <strong>1.</strong> Obfuscated methods have names like <code>a()</code>, <code>b()</code>, <code>c()</code>.
+            <br />
+            <strong>2.</strong> Don't rely on method names. <strong>Look at the code</strong> inside.
+            <br />
+            <strong>3.</strong> Check for <strong>strings, constants, and patterns</strong>.
+            <br />
+            <strong>4.</strong> Use <strong>JADX</strong> with deobfuscation to see readable code.
+        </div>
+
+        <p><strong>4. Common Protection Patterns & How to Bypass Them</strong></p>
+
+        <div class="table-wrap">
+            <table>
+                <thead><tr><th>Protection</th><th>How to Identify</th><th>Bypass Method</th></tr></thead>
+                <tbody>
+                    <tr>
+                        <td><strong>License Check</strong></td>
+                        <td><code>checkLicense()Z</code><br/><code>verifyLicense()Z</code></td>
+                        <td>Force return <code>true</code></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Root Detection</strong></td>
+                        <td><code>isRooted()Z</code><br/><code>checkRoot()Z</code></td>
+                        <td>Force return <code>false</code></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Debug Detection</strong></td>
+                        <td><code>isDebugger()Z</code><br/><code>isDebugging()Z</code></td>
+                        <td>Force return <code>false</code></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Signature Verification</strong></td>
+                        <td><code>verifySignature()Z</code><br/><code>checkSignatures()Z</code></td>
+                        <td>Force return <code>true</code></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Timer/Expiry</strong></td>
+                        <td><code>isExpired()Z</code><br/><code>checkExpiry()Z</code></td>
+                        <td>Force return <code>false</code></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="highlight-box" style="border-color: rgba(255, 215, 0, 0.12);">
+            <span class="emoji">⚡</span> <strong>Advanced Strategy:</strong><br />
+            If an app has <strong>multiple checks</strong>, use <strong>multiple patches</strong>.
+            <br /><br />
+            For example:
+            <br />
+            🔸 <code>checkLicense()</code> → Force <code>true</code>
+            <br />
+            🔸 <code>checkRoot()</code> → Force <code>false</code>
+            <br />
+            🔸 <code>checkTimer()</code> → Force <code>false</code>
+            <br /><br />
+            <strong>Combine techniques</strong> for guaranteed success! 🎯
+        </div>
+    </div>
+
+    <!-- PREVIEW LESSON 19 -->
+    <div class="lesson-card" style="border-left-color: #ff6b00;">
+        <div class="lesson-number" style="color:#ff6b00;">🔮 Lesson 19 (Preview)</div>
+        <h2 style="background: linear-gradient(135deg, #ffd0b0, #ff6b00); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Project 1: Modding a Simple App</h2>
+        <p>
+            In Lesson 19, we'll <strong style="color:#ff6b00;">apply everything we've learned</strong> to mod a real app!
+            <br />
+            You'll work through the entire process <strong>step by step</strong>.
+        </p>
+        <div class="highlight-box" style="border-color: rgba(255, 107, 0, 0.12);">
+            <span class="emoji">📌</span> <strong>What you'll do:</strong><br />
+            🔹 Decompile an app<br />
+            🔹 Find premium features<br />
+            🔹 Apply patches<br />
+            🔹 Rebuild and test<br />
+            🔹 Celebrate your success! 🎉
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <div class="footer">
+        <span class="sn">🔥 SN Mods</span> <span style="color:#4a5a6a;"> • </span>
+        <span class="heart">❤️</span> <span style="color:#4a5a6a;"> • </span>
+        <span class="tag">@Cyber_Ninja513</span><br />
+        <span style="color:#4a5a6a; font-size:0.7rem;">Smali Town • Lesson 18 of 20</span>
+    </div>
+
+</div>
+<script>
+    document.addEventListener('gesturestart', function(e){e.preventDefault();});
+    document.addEventListener('keydown', function(e){
+        if(e.ctrlKey && (e.key==='+'||e.key==='-'||e.key==='0')) e.preventDefault();
+    });
+    document.addEventListener('wheel', function(e){
+        if(e.ctrlKey) e.preventDefault();
+    }, {passive: false});
+    document.querySelector('.container').addEventListener('touchmove', function(e){
+        if(e.touches.length > 1) e.preventDefault();
+    }, {passive: false});
+    console.log('✅ SN Mods | Smali Town - Lesson 18 loaded');
+    console.log('😈 @Cyber_Ninja513');
+</script>
+</body>
+</html>

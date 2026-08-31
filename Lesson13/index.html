@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>SN Mods | Smali Lesson 13</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0f0f2a;
+            color: #e0e6f0;
+            padding: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            overflow-y: auto;
+            overflow-x: hidden;
+            background-image:
+                radial-gradient(ellipse at 10% 20%, rgba(255, 100, 200, 0.06) 0%, transparent 50%),
+                radial-gradient(ellipse at 90% 80%, rgba(255, 200, 100, 0.06) 0%, transparent 50%);
+        }
+        .container {
+            max-width: 860px;
+            width: 100%;
+            background: rgba(20, 20, 50, 0.92);
+            backdrop-filter: blur(16px);
+            border-radius: 40px;
+            padding: 28px 26px;
+            border: 1px solid rgba(255, 100, 200, 0.06);
+            box-shadow: 0 30px 80px rgba(0,0,0,0.9);
+            margin: 10px 0;
+            position: relative;
+            overflow: hidden;
+        }
+        .container::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle at 30% 40%, rgba(255,100,200,0.02), transparent 60%),
+                        radial-gradient(circle at 70% 60%, rgba(255,200,100,0.02), transparent 60%);
+            pointer-events: none;
+            animation: rotateBg 30s linear infinite;
+        }
+        @keyframes rotateBg {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 2px solid rgba(255, 100, 200, 0.08);
+            padding-bottom: 18px;
+            margin-bottom: 28px;
+            flex-wrap: wrap;
+            gap: 12px;
+            position: relative;
+            z-index: 1;
+        }
+        .header .brand .logo {
+            font-size: 1.2rem;
+            color: #ff64c8;
+            font-weight: 700;
+            background: rgba(255,100,200,0.06);
+            padding: 4px 14px;
+            border-radius: 50px;
+            border: 1px solid rgba(255,100,200,0.08);
+        }
+        .header h1 {
+            font-size: 1.8rem;
+            background: linear-gradient(135deg, #ff64c8, #ffc864);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 900;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .header h1 .icon { font-size: 2rem; animation: pulse 2s infinite; }
+        @keyframes pulse { 0%,100%{transform:scale(1);} 50%{transform:scale(1.1) rotate(5deg);} }
+        .header .badge {
+            background: rgba(255,100,200,0.1);
+            padding: 6px 20px;
+            border-radius: 50px;
+            font-size: 0.8rem;
+            color: #ff64c8;
+            border: 1px solid rgba(255,100,200,0.15);
+            font-weight: 600;
+        }
+        .lesson-card {
+            background: rgba(0,0,0,0.3);
+            border-radius: 24px;
+            padding: 24px 28px;
+            margin-bottom: 24px;
+            border-left: 5px solid #ff64c8;
+            box-shadow: 0 8px 40px rgba(0,0,0,0.3);
+            position: relative;
+            z-index: 1;
+            transition: 0.3s;
+        }
+        .lesson-card:hover { transform: translateX(4px); border-left-color: #ffc864; }
+        .lesson-card .lesson-number {
+            font-size: 0.75rem;
+            color: #ff64c8;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            font-weight: 700;
+            background: rgba(255,100,200,0.05);
+            display: inline-block;
+            padding: 4px 16px;
+            border-radius: 50px;
+            border: 1px solid rgba(255,100,200,0.06);
+            margin-bottom: 10px;
+        }
+        .lesson-card h2 {
+            font-size: 1.8rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #fff, #ff64c8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin: 6px 0 14px 0;
+        }
+        .lesson-card p { line-height: 2; color: #c8d4e8; font-size: 1.02rem; }
+        .lesson-card p strong { color: #ff64c8; }
+        .highlight-box {
+            background: rgba(255,100,200,0.05);
+            border-radius: 16px;
+            padding: 16px 22px;
+            margin: 18px 0;
+            border: 1px solid rgba(255,100,200,0.06);
+            transition: 0.3s;
+        }
+        .highlight-box:hover { border-color: rgba(255,100,200,0.15); }
+        .highlight-box .emoji { font-size: 1.4rem; margin-right: 8px; }
+        .highlight-box strong { color: #ff64c8; }
+        .highlight-box code {
+            color: #ff64c8;
+            font-family: 'Fira Code', monospace;
+            background: rgba(0,0,0,0.4);
+            padding: 2px 12px;
+            border-radius: 6px;
+            font-size: 0.9rem;
+        }
+        .code-block {
+            background: #070b16;
+            border-radius: 18px;
+            padding: 20px 24px;
+            overflow-x: auto;
+            border: 1px solid rgba(255,100,200,0.04);
+            font-family: 'Fira Code', monospace;
+            font-size: 0.92rem;
+            direction: ltr;
+            text-align: left;
+            white-space: pre-wrap;
+            color: #d4e0ff;
+            margin: 16px 0;
+            box-shadow: inset 0 4px 30px rgba(0,0,0,0.6);
+            transition: 0.3s;
+        }
+        .code-block:hover { border-color: rgba(255,100,200,0.1); }
+        .code-block .comment { color: #4a7a8a; font-style: italic; }
+        .code-block .keyword { color: #ff79c6; font-weight: 700; }
+        .code-block .string { color: #f1fa8c; }
+        .code-block .number { color: #bd93f9; font-weight: 600; }
+        .code-block .class { color: #8be9fd; font-weight: 600; }
+        .code-block .method { color: #50fa7b; font-weight: 600; }
+        .code-block .opcode { color: #50fa7b; font-weight: 700; }
+        .code-block .register { color: #ffb86c; font-weight: 600; }
+        .code-block .label { color: #ffd700; font-weight: 600; }
+        .table-wrap {
+            overflow-x: auto;
+            margin: 18px 0;
+            border-radius: 18px;
+            border: 1px solid rgba(255,255,255,0.03);
+            box-shadow: 0 4px 30px rgba(0,0,0,0.2);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: rgba(0,0,0,0.25);
+            font-size: 0.95rem;
+        }
+        th {
+            background: rgba(255,100,200,0.06);
+            color: #ff64c8;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            font-size: 0.75rem;
+            padding: 14px 18px;
+            border-bottom: 2px solid rgba(255,100,200,0.04);
+        }
+        td {
+            padding: 13px 18px;
+            border-bottom: 1px solid rgba(255,255,255,0.02);
+            color: #c8d4e8;
+        }
+        tr:hover td { background: rgba(255,100,200,0.02); }
+        td code {
+            color: #8be9fd;
+            font-family: 'Fira Code', monospace;
+            background: rgba(0,0,0,0.3);
+            padding: 2px 10px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 28px;
+            color: #4a5a6a;
+            font-size: 0.8rem;
+            border-top: 1px solid rgba(255,255,255,0.02);
+            padding-top: 20px;
+            position: relative;
+            z-index: 1;
+        }
+        .footer .sn {
+            background: linear-gradient(135deg, #ff64c8, #ffc864);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 700;
+            font-size: 1rem;
+        }
+        .footer .heart { color: #ff2d75; animation: pulse 1.5s infinite; display: inline-block; }
+        .footer .tag { color: #88aaff; font-weight: 600; }
+        @media (max-width: 600px) {
+            .container { padding: 16px 14px; }
+            .header h1 { font-size: 1.4rem; }
+            .lesson-card h2 { font-size: 1.3rem; }
+            .lesson-card { padding: 18px 16px; }
+            .code-block { font-size: 0.75rem; padding: 14px 16px; }
+            .highlight-box { padding: 14px 16px; }
+            th, td { padding: 10px 12px; font-size: 0.85rem; }
+            .header .brand .logo { font-size: 0.9rem; }
+        }
+        ::-webkit-scrollbar { width: 5px; height: 5px; }
+        ::-webkit-scrollbar-track { background: rgba(255,255,255,0.02); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb { background: linear-gradient(180deg, #ff64c8, #ffc864); border-radius: 10px; }
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <!-- HEADER -->
+    <div class="header">
+        <div class="brand"><span class="logo">🔥 SN Mods</span></div>
+        <h1><span class="icon">🏘️</span> Smali Town</h1>
+        <span class="badge">📘 Lesson 13 / 20</span>
+    </div>
+
+    <!-- LESSON 13 -->
+    <div class="lesson-card">
+        <div class="lesson-number">📖 Lesson 13</div>
+        <h2>Working with Strings</h2>
+
+        <p>
+            <strong>Strings</strong> are sequences of characters used everywhere in apps - <strong>UI text, user data, messages, and more</strong>.
+            In Smali, strings are handled as <code>Ljava/lang/String;</code> objects.
+        </p>
+
+        <div class="highlight-box">
+            <span class="emoji">📝</span> <strong>Why strings matter for modding:</strong><br />
+            Strings often contain <strong>toast messages, error texts, premium messages, or hidden data</strong>.
+            By modifying strings, you can <strong>change messages, bypass checks, or reveal hidden content</strong>!
+        </div>
+
+        <p><strong>String OpCodes:</strong></p>
+
+        <div class="table-wrap">
+            <table>
+                <thead><tr><th>OpCode</th><th>Purpose</th><th>Example</th></tr></thead>
+                <tbody>
+                    <tr><td><code>const-string</code></td><td>Load a string</td><td><code>const-string v0, "Hello"</code></td></tr>
+                    <tr><td><code>invoke-virtual</code></td><td>Call string method</td><td><code>invoke-virtual {v0}, Ljava/lang/String;->length()I</code></td></tr>
+                    <tr><td><code>invoke-static</code></td><td>Call static string method</td><td><code>invoke-static {v0}, Ljava/lang/String;->valueOf(I)Ljava/lang/String;</code></td></tr>
+                    <tr><td><code>iget-object</code></td><td>Get string from field</td><td><code>iget-object v0, p0, Lcom/example/User;->name:Ljava/lang/String;</code></td></tr>
+                    <tr><td><code>iput-object</code></td><td>Set string to field</td><td><code>iput-object v0, p0, Lcom/example/User;->name:Ljava/lang/String;</code></td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="highlight-box" style="border-color: rgba(255, 215, 0, 0.12);">
+            <span class="emoji">🔥</span> <strong>Modding Example: Change a Toast Message</strong><br />
+            Find a toast message like <code>"Purchase failed"</code> and change it:
+            <br /><br />
+            Original: <code>const-string v0, "Purchase failed"</code>
+            <br />
+            Modified: <code>const-string v0, "Purchase successful!"</code>
+            <br /><br />
+            Or even better, <strong>find the check that shows this message</strong> and bypass it!
+        </div>
+
+        <p><strong>Common String Operations:</strong></p>
+
+        <div class="code-block">
+<span class="comment"># 1. Get string length</span>
+<span class="opcode">invoke-virtual</span> {<span class="register">v0</span>}, <span class="class">Ljava/lang/String;</span><span class="opcode">-</span><span class="method">length</span>()<span class="class">I</span>
+<span class="opcode">move-result</span> <span class="register">v1</span>
+
+<span class="comment"># 2. Check if string equals another</span>
+<span class="opcode">const-string</span> <span class="register">v2</span>, <span class="string">"VIP"</span>
+<span class="opcode">invoke-virtual</span> {<span class="register">v0</span>, <span class="register">v2</span>}, <span class="class">Ljava/lang/String;</span><span class="opcode">-</span><span class="method">equals</span>(<span class="class">Ljava/lang/Object;</span>)<span class="class">Z</span>
+<span class="opcode">move-result</span> <span class="register">v3</span>
+
+<span class="comment"># 3. Convert int to string</span>
+<span class="opcode">invoke-static</span> {<span class="register">v4</span>}, <span class="class">Ljava/lang/String;</span><span class="opcode">-</span><span class="method">valueOf</span>(<span class="class">I</span>)<span class="class">Ljava/lang/String;</span>
+<span class="opcode">move-result-object</span> <span class="register">v5</span>
+        </div>
+
+        <div class="highlight-box" style="border-color: rgba(0, 200, 255, 0.12);">
+            <span class="emoji">💡</span> <strong>Pro Tip:</strong><br />
+            When searching for strings, look for <strong>hardcoded messages</strong> like:
+            <br />
+            <code>"You are not VIP"</code> → Find this and see what checks are around it!
+            <br />
+            <code>"Purchase successful"</code> → This tells you where the success path is!
+            <br />
+            <code>"Error"</code> → Look here to remove or bypass errors!
+        </div>
+
+        <p><strong>Example: Bypass VIP Check Using Strings</strong></p>
+
+        <div class="code-block">
+<span class="comment"># Find the check that shows this message</span>
+<span class="comment"># Search for: "You are not VIP"</span>
+
+<span class="comment"># You'll find something like:</span>
+<span class="label">:not_vip</span>
+<span class="opcode">const-string</span> <span class="register">v0</span>, <span class="string">"You are not VIP"</span>
+<span class="opcode">invoke-static</span> {<span class="register">p0</span>, <span class="register">v0</span>}, <span class="class">Landroid/widget/Toast;</span><span class="opcode">-</span><span class="method">makeText</span>(<span class="class">Landroid/content/Context;</span><span class="opcode">,</span> <span class="class">Ljava/lang/CharSequence;</span><span class="opcode">,</span> <span class="class">I</span>)<span class="class">Landroid/widget/Toast;</span>
+
+<span class="comment"># Change the condition that leads here!</span>
+<span class="comment"># For example, change if-eqz to if-nez</span>
+        </div>
+
+        <div class="highlight-box" style="border-color: rgba(255, 215, 0, 0.12);">
+            <span class="emoji">⚡</span> <strong>Quick Strategy:</strong><br />
+            Search for <strong>strings in the app</strong> that you want to change.
+            <br />
+            Then trace back to find <strong>where they're used</strong> and <strong>what conditions control them</strong>.
+            <br /><br />
+            This is one of the <strong>easiest and most effective</strong> modding techniques!
+        </div>
+    </div>
+
+    <!-- PREVIEW LESSON 14 -->
+    <div class="lesson-card" style="border-left-color: #ffc864;">
+        <div class="lesson-number" style="color:#ffc864;">🔮 Lesson 14 (Preview)</div>
+        <h2 style="background: linear-gradient(135deg, #ffd0b0, #ffc864); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Math & Calculations</h2>
+        <p>
+            In Lesson 14, we'll learn about <strong style="color:#ffc864;">mathematical operations</strong> in Smali.
+            This includes addition, subtraction, multiplication, and more.
+        </p>
+        <div class="highlight-box" style="border-color: rgba(255, 200, 100, 0.12);">
+            <span class="emoji">📌</span> <strong>Key OpCodes:</strong><br />
+            <code>add-int</code> → Addition<br />
+            <code>sub-int</code> → Subtraction<br />
+            <code>mul-int</code> → Multiplication<br />
+            <code>div-int</code> → Division
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <div class="footer">
+        <span class="sn">🔥 SN Mods</span> <span style="color:#4a5a6a;"> • </span>
+        <span class="heart">❤️</span> <span style="color:#4a5a6a;"> • </span>
+        <span class="tag">@Cyber_Ninja513</span><br />
+        <span style="color:#4a5a6a; font-size:0.7rem;">Smali Town • Lesson 13 of 20</span>
+    </div>
+
+</div>
+<script>
+    document.addEventListener('gesturestart', function(e){e.preventDefault();});
+    document.addEventListener('keydown', function(e){
+        if(e.ctrlKey && (e.key==='+'||e.key==='-'||e.key==='0')) e.preventDefault();
+    });
+    document.addEventListener('wheel', function(e){
+        if(e.ctrlKey) e.preventDefault();
+    }, {passive: false});
+    document.querySelector('.container').addEventListener('touchmove', function(e){
+        if(e.touches.length > 1) e.preventDefault();
+    }, {passive: false});
+    console.log('✅ SN Mods | Smali Town - Lesson 13 loaded');
+    console.log('😈 @Cyber_Ninja513');
+</script>
+</body>
+</html>
